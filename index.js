@@ -42,4 +42,4 @@ const root = () => {
 }
 
 // registerRootComponent(root)
-registerRootComponent(Sentry.Native.wrap(App))
+registerRootComponent(Sentry.Native.wrap(root))

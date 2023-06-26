@@ -58,7 +58,12 @@ const App = () => {
 				// await Font.loadAsync(Entypo.font)
 				// Artificially delay for two seconds to simulate a slow loading
 				// experience. Please remove this if you copy and paste the code!
-				await new Promise(resolve => setTimeout(resolve, 200))
+				await new Promise(resolve => {
+					if(state.user === 'isLoading'){
+						dispatch({...state, user: false})
+					}
+					setTimeout(resolve, 200)
+				})
 			} catch (e) {
 				// Alert.alert('2nd Use Effect', `${e}`, [{text: 'Close', style: 'cancel'}])
 				// console.warn(e)
@@ -77,7 +82,6 @@ const App = () => {
 	if (state.user === false) {
 		return <Landing />
 	} else if (state.user == 'isLoading') {
-		// return <Text>{JSON.stringify(state.user)}</Text>
 		return <Loading />
 	} else {
 		try {
