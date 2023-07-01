@@ -47,7 +47,12 @@ const registerBackgroundTask = async () => {
 
 const App = () => {
 	const [state, dispatch] = useGlobalState()
-	console.log(state)
+
+	const [user, setUser] = useState('isLoading')
+	
+	useEffect(() => {
+		setUser(state.user)
+	},[state.user])
 
 	useEffect(() => {
 		// Alert.alert('1st Use Effect', 'App.js loaded', [{text: 'Close', style: 'cancel'}])
@@ -58,17 +63,17 @@ const App = () => {
 				// await Font.loadAsync(Entypo.font)
 				// Artificially delay for two seconds to simulate a slow loading
 				// experience. Please remove this if you copy and paste the code!
-				await new Promise(resolve => {
+				await new Promise(async resolve => {
 					if(state.user === 'isLoading'){
-						dispatch({...state, user: false})
+						await dispatch({...state, user: false})
 					}
-					setTimeout(resolve, 200)
+					setTimeout(await resolve, 200)
 				})
 			} catch (e) {
 				// Alert.alert('2nd Use Effect', `${e}`, [{text: 'Close', style: 'cancel'}])
 				// console.warn(e)
 				// console.log(e)
-				// Sentry.Browser.captureException(e)
+				// Sentry.Native.captureException(e)
 				await SplashScreen.hideAsync()
 			} finally {
 				// Alert.alert('3rd Use Effect', 'finally', [{text: 'Close', style: 'cancel'}])
@@ -79,9 +84,9 @@ const App = () => {
 		prepare()
 	}, [])
 
-	if (state.user === false) {
+	if (user === false) {
 		return <Landing />
-	} else if (state.user == 'isLoading') {
+	} else if (user == 'isLoading') {
 		return <Loading />
 	} else {
 		try {
@@ -106,12 +111,11 @@ const App = () => {
 							<Stack.Screen name="Items" component={ItemView} />
 							<Stack.Screen name="Account" component={Account} />
 						</Stack.Navigator>
-						<Footer user={{ isAnonymous: state.user.isAnonymous }} />
+						<Footer user={{ isAnonymous: user.isAnonymous }} />
 					</ContentContainer>
 				</NavigationContainer>
 			)
 		} catch (e) {
-			// Sentry.Native.captureException(e)
 			return <Text>Error</Text>
 		}
 	}

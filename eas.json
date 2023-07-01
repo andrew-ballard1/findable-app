@@ -4,7 +4,7 @@
 	},
 	"build": {
 		"development": {
-			"autoIncrement": true,
+			// "autoIncrement": true,
 			"developmentClient": true,
 			"distribution": "internal"
 		},

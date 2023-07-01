@@ -3,6 +3,11 @@ import firebase from './firebase'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
+import * as Sentry from 'sentry-expo'
+import { inspect } from 'util'
+
+import { Alert } from 'react-native'
+
 console.log("CONTEXT FILE LOADED")
 
 const auth = getAuth(firebase)
@@ -30,10 +35,17 @@ const GlobalStateProvider = ({ children }) => {
 
 	useEffect(() => {
 		const startAuth = async () => {
-			console.log('autn start hook')
+			console.log('auth start hook')
 			await onAuthStateChanged(auth, async (user) => {
+				Alert.alert('AuthStateChange', JSON.stringify(inspect(user, {depth: 1})), [{text: 'Close', style: 'cancel'}])
+
 				console.log("auth start")
+				// Sentry.Native.captureEvent('onAuthChanged function')
+				// Sentry.Native.captureEvent(inspect(user, {depth: 5}))
+
 				if (user) {
+					Alert.alert('User!', user.uid, [{text: 'Close', style: 'cancel'}])
+
 					console.log("HERE IS THE USER")
 					console.log(JSON.stringify(user, null, 4))
 
@@ -62,9 +74,11 @@ const GlobalStateProvider = ({ children }) => {
 
 					// Redirect the user to the appropriate screen based on their authentication status
 				} else {
+
 					console.log('User is signed out')
 					// try to get user credential from local storage
 					try {
+						Alert.alert('No User', 'Reading from local storage', [{text: 'Close', style: 'cancel'}])
 						console.log("trying to get user from local storage")
 						const cred = await AsyncStorage.getItem("user")
 						console.log('test')
@@ -72,6 +86,8 @@ const GlobalStateProvider = ({ children }) => {
 						console.log(JSON.parse(cred))
 						const user = JSON.parse(cred)
 						if(!user){
+							Alert.alert('No Local User', 'Reading local storage succeeded, but there was no user', [{text: 'Close', style: 'cancel'}])
+
 							console.log('first launch')
 							// throw 'First launch'
 							await dispatch({ ...state, user: false })
@@ -80,7 +96,6 @@ const GlobalStateProvider = ({ children }) => {
 						}
 						const idToken = user?._tokenResponse?.idToken
 						// const userCred = signInWithCredential(idToken)
-						console.log("This must be where user is fucked up")
 						console.log(user)
 						await dispatch({
 							...state,
@@ -101,6 +116,8 @@ const GlobalStateProvider = ({ children }) => {
 						// there is no user
 
 					} catch (err) {
+						Alert.alert('Local Err', JSON.stringify(err), [{text: 'Close', style: 'cancel'}])
+
 						console.log('Error signing in user from local credential')
 						console.log(err)
 						await dispatch({ ...state, user: false })

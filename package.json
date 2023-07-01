@@ -25,7 +25,8 @@
     "sentry-expo": "~6.2.0",
     "@react-native-picker/picker": "2.4.8",
     "expo-notifications": "~0.18.1",
-    "expo-splash-screen": "~0.18.2"
+    "expo-splash-screen": "~0.18.2",
+    "expo-dev-client": "~2.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
