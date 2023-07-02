@@ -5,6 +5,10 @@ import App from './App'
 import { useEffect } from 'react'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
+import ErrorBoundary from 'react-native-error-boundary'
+import * as SplashScreen from 'expo-splash-screen'
+import { View, Text, Button } from 'react-native'
+
 // import { SentryClient } from './sentry'
 
 
@@ -25,6 +29,8 @@ const init = async () => {
 
 init()
 
+
+
 const root = () => {
 	// useEffect(() => {
 	// 	Sentry.init({
@@ -36,14 +42,34 @@ const root = () => {
 	// 	})
 
 	// }, [])
+	const CustomFallback = ({ error, resetError }) => {
+		useEffect(() => {
+			const hideSplash = async () => {
+				await SplashScreen.hideAsync()
+			}
+			hideSplash()
+		}, [])
+	
+		return (
+			<View>
+				<Text>Something happened!</Text>
+				<Text>{error.toString()}</Text>
+				<Button onPress={resetError} title={'Try again'} />
+			</View>
+		)
+	
+	}
+
 	return (
-		<GlobalStateProvider>
-			<SafeAreaProvider>
-				<App />
-			</SafeAreaProvider>
-		</GlobalStateProvider>
+		<ErrorBoundary FallbackComponent={CustomFallback}>
+			<GlobalStateProvider>
+				<SafeAreaProvider>
+					<App />
+				</SafeAreaProvider>
+			</GlobalStateProvider>
+		</ErrorBoundary>
 	)
 }
 
-// registerRootComponent(root)
-registerRootComponent(Sentry.Native.wrap(root))
+registerRootComponent(root)
+// registerRootComponent(Sentry.Native.wrap(root))

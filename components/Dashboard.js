@@ -4,7 +4,7 @@ import VerticalCarousel from './VerticalCarousel'
 import { useNavigation } from '@react-navigation/native'
 import * as Location from 'expo-location'
 import { useGlobalState } from '../Context'
-import * as Sentry from 'sentry-expo'
+// import * as Sentry from 'sentry-expo'
 
 
 

@@ -13,7 +13,8 @@ import ItemView from './screens/ItemView'
 import { useGlobalState } from './Context'
 import * as Location from 'expo-location'
 import * as Notifications from 'expo-notifications'
-import { Text } from 'react-native'
+import { Text, View, Alert } from 'react-native'
+import { inspect } from 'util'
 
 import * as SplashScreen from 'expo-splash-screen'
 // import * as Sentry from 'sentry-expo'
@@ -48,21 +49,10 @@ const registerBackgroundTask = async () => {
 const App = () => {
 	const [state, dispatch] = useGlobalState()
 
-	const [user, setUser] = useState('isLoading')
-	
 	useEffect(() => {
-		setUser(state.user)
-	},[state.user])
-
-	useEffect(() => {
-		// Alert.alert('1st Use Effect', 'App.js loaded', [{text: 'Close', style: 'cancel'}])
 		const prepare = async () => {
 			try {
-				// Alert.alert('2nd Use Effect', 'prepare try loaded', [{text: 'Close', style: 'cancel'}])
-				// Pre-load fonts, make any API calls you need to do here
-				// await Font.loadAsync(Entypo.font)
-				// Artificially delay for two seconds to simulate a slow loading
-				// experience. Please remove this if you copy and paste the code!
+				// Alert.alert('Try', 'Trying dispatch', [{text: 'Close', style: 'cancel'}])
 				await new Promise(async resolve => {
 					if(state.user === 'isLoading'){
 						await dispatch({...state, user: false})
@@ -84,9 +74,9 @@ const App = () => {
 		prepare()
 	}, [])
 
-	if (user === false) {
+	if (state.user === false) {
 		return <Landing />
-	} else if (user == 'isLoading') {
+	} else if (state.user == 'isLoading') {
 		return <Loading />
 	} else {
 		try {
@@ -111,12 +101,17 @@ const App = () => {
 							<Stack.Screen name="Items" component={ItemView} />
 							<Stack.Screen name="Account" component={Account} />
 						</Stack.Navigator>
-						<Footer user={{ isAnonymous: user.isAnonymous }} />
+						<Footer user={{ isAnonymous: state.user.isAnonymous }} />
 					</ContentContainer>
 				</NavigationContainer>
 			)
 		} catch (e) {
-			return <Text>Error</Text>
+			return (
+				<View style={{display: 'flex', flex: 1, marginTop: 100, justifyContent: 'center'}}>
+					<Text>App.js Error</Text>
+					<Text>{inspect(e, {depth: 5})}</Text>
+				</View>
+			)
 		}
 	}
 }

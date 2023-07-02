@@ -3,7 +3,7 @@ import firebase from './firebase'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-import * as Sentry from 'sentry-expo'
+// import * as Sentry from 'sentry-expo'
 import { inspect } from 'util'
 
 import { Alert } from 'react-native'
@@ -37,14 +37,14 @@ const GlobalStateProvider = ({ children }) => {
 		const startAuth = async () => {
 			console.log('auth start hook')
 			await onAuthStateChanged(auth, async (user) => {
-				Alert.alert('AuthStateChange', JSON.stringify(inspect(user, {depth: 1})), [{text: 'Close', style: 'cancel'}])
+				// Alert.alert('AuthStateChange', JSON.stringify(inspect(user, {depth: 1})), [{text: 'Close', style: 'cancel'}])
 
 				console.log("auth start")
 				// Sentry.Native.captureEvent('onAuthChanged function')
 				// Sentry.Native.captureEvent(inspect(user, {depth: 5}))
 
 				if (user) {
-					Alert.alert('User!', user.uid, [{text: 'Close', style: 'cancel'}])
+					// Alert.alert('User!', user.uid, [{text: 'Close', style: 'cancel'}])
 
 					console.log("HERE IS THE USER")
 					console.log(JSON.stringify(user, null, 4))
@@ -78,7 +78,7 @@ const GlobalStateProvider = ({ children }) => {
 					console.log('User is signed out')
 					// try to get user credential from local storage
 					try {
-						Alert.alert('No User', 'Reading from local storage', [{text: 'Close', style: 'cancel'}])
+						// Alert.alert('No User', 'Reading from local storage', [{text: 'Close', style: 'cancel'}])
 						console.log("trying to get user from local storage")
 						const cred = await AsyncStorage.getItem("user")
 						console.log('test')
@@ -86,7 +86,7 @@ const GlobalStateProvider = ({ children }) => {
 						console.log(JSON.parse(cred))
 						const user = JSON.parse(cred)
 						if(!user){
-							Alert.alert('No Local User', 'Reading local storage succeeded, but there was no user', [{text: 'Close', style: 'cancel'}])
+							// Alert.alert('No Local User', 'Reading local storage succeeded, but there was no user', [{text: 'Close', style: 'cancel'}])
 
 							console.log('first launch')
 							// throw 'First launch'
@@ -116,7 +116,7 @@ const GlobalStateProvider = ({ children }) => {
 						// there is no user
 
 					} catch (err) {
-						Alert.alert('Local Err', JSON.stringify(err), [{text: 'Close', style: 'cancel'}])
+						// Alert.alert('Local Err', JSON.stringify(err), [{text: 'Close', style: 'cancel'}])
 
 						console.log('Error signing in user from local credential')
 						console.log(err)
