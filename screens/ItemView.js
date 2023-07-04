@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, Button, FlatList, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, Button, FlatList, TouchableOpacity, StyleSheet, Dimensions } from 'react-native'
 import EmptyListComponent from '../components/EmptyListComponent'
 import DeleteItemDialog from '../components/DeleteItemDialog'
 import { DeleteIcon } from '../svgs/Icons'
@@ -8,7 +8,7 @@ import AddItemDialog from '../components/AddItemDialog'
 import { deleteItem, getItems } from '../helpers/itemHelpers'
 import { useGlobalState } from '../Context'
 
-const ItemView = ({route}) => {
+const ItemView = ({ route }) => {
 	console.log(route.params)
 	const [viewMode, setViewMode] = useState('line')
 	const [items, setItems] = useState([])
@@ -18,7 +18,7 @@ const ItemView = ({route}) => {
 	const [deleteLoading, setDeleteLoading] = useState(false)
 
 	useEffect(() => {
-		const unsubItems = getItems({uid: state.user.uid}, (items) => {
+		const unsubItems = getItems({ uid: state.user.uid }, (items) => {
 			setItems(items)
 		})
 
@@ -43,7 +43,7 @@ const ItemView = ({route}) => {
 		setShowDeleteDialog(label)
 	}
 
-	const handleDeleteItem = async ({label, itemId}) => {
+	const handleDeleteItem = async ({ label, itemId }) => {
 		// make call to delete item
 		console.log(`Delete Item ${label}`)
 		setDeleteLoading(true)
@@ -90,41 +90,20 @@ const ItemView = ({route}) => {
 
 	return (
 		<View style={styles.container}>
-			<View style={[styles.header, {justifyContent: 'center'}]}>
-				<Text style={[styles.title, {textAlign: 'center'}]}>Your Things</Text>
-				{/* <View style={styles.viewModeButtons}>
-					<Button
-						title="Grid View"
-						onPress={() => setViewMode('grid')}
-						disabled={viewMode === 'grid'}
-					/>
-					<Button
-						title="Line View"
-						onPress={() => setViewMode('line')}
-						disabled={viewMode === 'line'}
-					/>
-				</View> */}
+			<View style={[styles.header, { justifyContent: 'center' }]}>
+				<Text style={[styles.title, { textAlign: 'center' }]}>Your Things</Text>
 			</View>
 
 			<Button title="Add New Item" onPress={handleAddItem} />
 
-			{viewMode === 'grid' ? (
-				<FlatList
-					key={'grid'}
-					data={items}
-					renderItem={renderItemGridItem}
-					ListEmptyComponent={EmptyListComponent}
-					numColumns={2}
-				/>
-			) : (
-				<FlatList
-					key={'line'}
-					data={items}
-					// keyExtractor={(item) => item.id.toString()}
-					renderItem={renderItemLineItem}
-					numColumns={1}
-				/>
-			)}
+			<FlatList
+				style={{ height: 900, minHeight: '100%' }}
+				key={'line'}
+				data={items}
+				// keyExtractor={(item) => item.id.toString()}
+				renderItem={renderItemLineItem}
+				numColumns={1}
+			/>
 
 			<AddItemDialog isVisible={showAddDialog} handleCancel={handleCancelAdd} />
 			<DeleteItemDialog style={{ position: 'absolute' }} deleteLoading={deleteLoading} itemDetails={showDeleteDialog} cancelDelete={() => promptDelete(false)} deleteItem={handleDeleteItem} isVisible={true} />
@@ -161,7 +140,8 @@ const styles = StyleSheet.create({
 		textAlign: 'center',
 	},
 	container: {
-		flex: 1,
+		flex: 0,
+		height: Dimensions.get("screen").height,
 		paddingHorizontal: 20,
 		paddingTop: 20,
 		overflow: 'hidden'

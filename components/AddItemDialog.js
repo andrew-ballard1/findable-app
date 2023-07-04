@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, KeyboardAvoidingView, Platform, Keyboard } from 'react-native'
 
 import colors from '../colors'
 import { addItem } from '../helpers/itemHelpers'
@@ -8,7 +8,7 @@ import Dropdown from './Dropdown'
 import { getBoxesOnce } from '../helpers/boxHelpers'
 
 const AddItemDialog = ({ handleCancel, isVisible = false }) => {
-	const dialogAnimation = new Animated.Value(isVisible ? 0 : 1)
+	const dialogAnimation = new Animated.Value(isVisible ? 1 : 0)
 
 	const [label, setLabel] = useState('')
 	const [description, setDescription] = useState('')
@@ -23,10 +23,21 @@ const AddItemDialog = ({ handleCancel, isVisible = false }) => {
 	}, [])
 
 	useEffect(() => {
-		if(boxId === ''){
-			setBoxId(null)
+		if (isVisible && dialogAnimation.__getValue() < 0.99) {
+			Animated.spring(dialogAnimation, {
+				toValue: 1,
+				useNativeDriver: true,
+			}).start()
+		} else if (!isVisible && dialogAnimation.__getValue() > 0.01) {
+			Animated.spring(dialogAnimation, {
+				toValue: 0,
+				useNativeDriver: true,
+			}).start()
 		}
-	}, [boxId])
+		console.log('isVisible hook')
+		console.log(isVisible)
+	}, [isVisible])
+
 
 	useEffect(() => {
 		const getBoxList = async () => {
@@ -35,6 +46,7 @@ const AddItemDialog = ({ handleCancel, isVisible = false }) => {
 				return {label: item.label, value: item.id}
 			}))
 		}
+
 		if(state.user.uid){
 			getBoxList()
 		}
@@ -56,7 +68,7 @@ const AddItemDialog = ({ handleCancel, isVisible = false }) => {
 
 	const dialogTranslateY = dialogAnimation.interpolate({
 		inputRange: [0, 1],
-		outputRange: [300, -50]
+		outputRange: [300, -80]
 	})
 
 	const handleAddItem = async () => {
@@ -75,68 +87,73 @@ const AddItemDialog = ({ handleCancel, isVisible = false }) => {
 	}
 
 	return (
-		<View style={[styles.container, { position: 'absolute' }]}>
-			<Animated.View
-				style={[
-					styles.dialogContainer,
-					{
-						transform: [{ translateY: dialogTranslateY }],
-					},
-				]}
-			>
-				<View style={styles.dialogContent}>
-					<Text style={styles.dialogText}>
-						Add a new thing!
-					</Text>
-					<View
-						style={{ display: 'flex', flexDirection: 'column', flex: 1, width: '100%', padding: 10, marginBottom: 20 }}
-					>
-						<TextInput
-							style={styles.dialogInput}
-							placeholder="Label..."
-							placeholderTextColor="#999999"
-							value={label}
-							onChangeText={text => setLabel(text)}
-						/>
-						<TextInput
-							style={styles.dialogInput}
-							placeholder="Description..."
-							placeholderTextColor="#999999"
-							value={description}
-							onChangeText={text => setDescription(text)}
-						/>
-					 	<Dropdown options={boxes} setter={setBoxId}/>
-					</View>
-					
-					<View style={[styles.addBoxButtonContainer, {marginBottom: 20, flexDirection: 'row'}]}>
-						<TouchableOpacity
-							style={[styles.dialogButton, styles.blueButton]}
-							onPress={handleAddItem}
+		<KeyboardAvoidingView
+			style={{ flex: 1 }}
+			behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
+			keyboardVerticalOffset={140}
+		>
+			<Animated.View style={[styles.container]}>
+				<Animated.View
+					style={[
+						styles.dialogContainer,
+						{
+							transform: [{ translateY: dialogTranslateY }],
+						},
+					]}
+				>
+					<View style={styles.dialogContent}>
+						<Text style={styles.dialogText}>
+							Add a new thing!
+						</Text>
+						<View
+							style={{ display: 'flex', flexDirection: 'column', flex: 1, width: '100%', padding: 10, marginBottom: 20 }}
 						>
-							<Text numberOfLines={1} style={styles.buttonText}>{buttonText}</Text>
-						</TouchableOpacity>
-						<TouchableOpacity
-							style={[styles.dialogButton, styles.greyButton]}
-							onPress={handleCancel}
-						>
-							<Text style={styles.buttonText}>Cancel</Text>
-						</TouchableOpacity>
+							<TextInput
+								style={styles.dialogInput}
+								placeholder="Label..."
+								placeholderTextColor="#999999"
+								value={label}
+								onChangeText={text => setLabel(text)}
+							/>
+							<TextInput
+								style={styles.dialogInput}
+								placeholder="Description..."
+								placeholderTextColor="#999999"
+								value={description}
+								onChangeText={text => setDescription(text)}
+							/>
+							<Dropdown options={boxes} setter={setBoxId}/>
+						</View>
+						
+						<View style={[styles.addBoxButtonContainer, {marginBottom: 20, flexDirection: 'row'}]}>
+							<TouchableOpacity
+								style={[styles.dialogButton, styles.blueButton]}
+								onPress={handleAddItem}
+							>
+								<Text numberOfLines={1} style={styles.buttonText}>{buttonText}</Text>
+							</TouchableOpacity>
+							<TouchableOpacity
+								style={[styles.dialogButton, styles.greyButton]}
+								onPress={handleCancel}
+							>
+								<Text style={styles.buttonText}>Cancel</Text>
+							</TouchableOpacity>
+						</View>
 					</View>
-				</View>
+				</Animated.View>
 			</Animated.View>
-		</View>
+		</KeyboardAvoidingView>
 	)
 }
 
 const styles = StyleSheet.create({
 	container: {
+		display: 'flex',
+		width: '100%',
+		alignSelf: 'center',
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
-		width: '95%',
-		left: '2.5%',
-		position: 'absolute',
-		bottom: 0
 	},
 	deleteButton: {
 		backgroundColor: 'red',
@@ -151,15 +168,16 @@ const styles = StyleSheet.create({
 		minWidth: 80
 	},
 	dialogInput: {
-		height: 60,
+		minHeight: 36,
+		borderColor: '#dddddd',
 		borderWidth: 1,
-		borderColor: '#eeeeee',
+		display: 'flex',
+		justifyContent: 'center',
 		borderRadius: 5,
 		paddingLeft: 5,
-		paddingVertical: 5,
-		marginVertical: 5,
-		flex: 0,
-		flexDirection: 'row'
+		marginBottom: 5,
+		flex: 1,
+		color: '#333333'
 	},
 	dialogContainer: {
 		position: 'absolute',

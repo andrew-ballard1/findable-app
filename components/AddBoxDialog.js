@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, KeyboardAvoidingView, Platform, Keyboard } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, KeyboardAvoidingView, Platform, Keyboard, Dimensions, Alert } from 'react-native'
 
 import colors from '../colors'
 import { addBox } from '../helpers/boxHelpers'
@@ -8,7 +8,7 @@ import { getItemsOnce } from '../helpers/itemHelpers'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 const AddBoxDialog = ({ handleCancel, isVisible = false }) => {
-	const dialogAnimation = new Animated.Value(isVisible ? 0 : 1)
+	let dialogAnimation = null 
 
 	const [label, setLabel] = useState('')
 	const [description, setDescription] = useState('')
@@ -16,39 +16,38 @@ const AddBoxDialog = ({ handleCancel, isVisible = false }) => {
 	const [items, setItems] = useState([])
 	const [state, dispatch] = useGlobalState()
 
-	const { bottom } = useSafeAreaInsets()
-
 	useEffect(() => {
-		dialogAnimation.setValue(0)
+		console.log('reloading dialog component')
 		const getItemList = async () => {
 			const itemList = await getItemsOnce(state.user.uid)
 			setItems(itemList)
 		}
-		if(state.user.uid){
+		if (state.user.uid) {
 			getItemList()
 		}
 	}, [])
 
+
 	useEffect(() => {
-		if (isVisible && dialogAnimation.__getValue() < 1) {
-			Animated.spring(dialogAnimation, {
-				toValue: 1,
-				useNativeDriver: true,
-			}).start()
-		} else if (!isVisible && dialogAnimation.__getValue() > 0) {
-			Animated.spring(dialogAnimation, {
-				toValue: 0,
-				useNativeDriver: true,
-			}).start()
-		}
+		dialogAnimation = new Animated.Value(state.modal.addBox ? -50 : 300)
+		dialogAnimation.stopAnimation()
+		// if (isVisible) {
+		Animated.timing(dialogAnimation, {
+			toValue: isVisible ? -50 : 300,
+			useNativeDriver: true,
+			duration: 1000
+		}).start()
 		console.log('isVisible hook')
 		console.log(isVisible)
 	}, [isVisible])
 
-	const dialogTranslateY = dialogAnimation.interpolate({
-		inputRange: [0, 1],
-		outputRange: [350, -50]
-	})
+	// const dialogTranslateY = dialogAnimation.interpolate({
+	// 	inputRange: [0, 1],
+	// 	outputRange: [300, -50]
+	// })
+	// dialogAnimation.addListener((val) => {
+	// 	console.log(val)
+	// })
 
 	const handleAddBox = async () => {
 		setButtonText("Adding...")
@@ -79,12 +78,17 @@ const AddBoxDialog = ({ handleCancel, isVisible = false }) => {
 			behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
 			keyboardVerticalOffset={140}
 		>
-			<View style={[styles.container]}>
+			<View 
+				style={[styles.container,
+				// {
+				// 	transform: [{ translateY: dialogAnimation }],
+				// },
+			]}>
 				<Animated.View
 					style={[
 						styles.dialogContainer,
 						{
-							transform: [{ translateY: dialogTranslateY }],
+							transform: [{ translateY: dialogAnimation }],
 						},
 					]}
 				>
@@ -150,9 +154,9 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
-		// position: 'absolute',
-		// bottom: 0,
-		// height: 'auto'
+		bottom: 0,
+		// top: Dimensions.get('screen').height,
+		// height: 250
 	},
 	deleteButton: {
 		backgroundColor: 'red',
@@ -179,7 +183,6 @@ const styles = StyleSheet.create({
 		color: '#333333'
 	},
 	dialogContainer: {
-		position: 'absolute',
 		height: 200,
 		backgroundColor: 'white',
 		borderRadius: 10,

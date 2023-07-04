@@ -5,24 +5,26 @@ import colors from '../colors'
 
 const DeleteItemDialog = ({ itemDetails, cancelDelete, deleteItem, isVisible = true }) => {
 	const {itemId, label} = itemDetails
-	const dialogAnimation = new Animated.Value(itemId ? 0 : 1)
+	const dialogAnimation = new Animated.Value(0)
 	useEffect(() => {
+		console.log(dialogAnimation.__getValue())
 		dialogAnimation.setValue(0)
 	}, [])
 
 	useEffect(() => {
-		if (itemId) {
+		console.log(itemId)
+		if (itemId && dialogAnimation.__getValue() < 0.99) {
 			Animated.spring(dialogAnimation, {
 				toValue: 1,
 				useNativeDriver: true,
 			}).start()
-		} else {
+		} else if(!itemId && dialogAnimation.__getValue() > 0.01) {
 			Animated.spring(dialogAnimation, {
 				toValue: 0,
 				useNativeDriver: true,
 			}).start()
 		}
-	}, [itemId])
+	}, [isVisible])
 
 	const dialogTranslateY = dialogAnimation.interpolate({
 		inputRange: [0, 1],
@@ -30,7 +32,7 @@ const DeleteItemDialog = ({ itemDetails, cancelDelete, deleteItem, isVisible = t
 	})
 
 	return (
-		<View style={[styles.container, {position: 'absolute'}]}>
+		<View style={[styles.container]}>
 			{isVisible && (
 				<Animated.View
 					style={[

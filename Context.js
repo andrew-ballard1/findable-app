@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useContext, createContext, useReducer } from 'react'
+import React, { useEffect, useContext, createContext, useReducer } from 'react'
 import firebase from './firebase'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 // import * as Sentry from 'sentry-expo'
-import { inspect } from 'util'
+// import { inspect } from 'util'
 
-import { Alert } from 'react-native'
+// import { Alert } from 'react-native'
 
 console.log("CONTEXT FILE LOADED")
 
@@ -14,12 +14,17 @@ const auth = getAuth(firebase)
 console.log(auth)
 
 const globalState = {
-	stuff: [],
-	things: [],
+	groups: [],
+	items: [],
 	user: 'isLoading',
 	auth,
 	api_url: 'https://localhost:3000',
-
+	modal: {
+		addBox: false,
+		deleteBox: false,
+		addItem: false,
+		deleteItem: false
+	}
 }
 
 const GlobalStateContext = createContext(globalState)
@@ -37,15 +42,9 @@ const GlobalStateProvider = ({ children }) => {
 		const startAuth = async () => {
 			console.log('auth start hook')
 			await onAuthStateChanged(auth, async (user) => {
-				// Alert.alert('AuthStateChange', JSON.stringify(inspect(user, {depth: 1})), [{text: 'Close', style: 'cancel'}])
-
-				console.log("auth start")
 				// Sentry.Native.captureEvent('onAuthChanged function')
 				// Sentry.Native.captureEvent(inspect(user, {depth: 5}))
-
 				if (user) {
-					// Alert.alert('User!', user.uid, [{text: 'Close', style: 'cancel'}])
-
 					console.log("HERE IS THE USER")
 					console.log(JSON.stringify(user, null, 4))
 
@@ -55,7 +54,6 @@ const GlobalStateProvider = ({ children }) => {
 						isAnonymous: user.isAnonymous ? true : false,
 						id_token: idToken
 					}))
-
 
 					await dispatch({
 						...state,
@@ -71,16 +69,18 @@ const GlobalStateProvider = ({ children }) => {
 					} else {
 						console.log('Email/password user is signed in:', user.uid)
 					}
-
-					// Redirect the user to the appropriate screen based on their authentication status
 				} else {
-
-					console.log('User is signed out')
 					// try to get user credential from local storage
 					try {
 						// Alert.alert('No User', 'Reading from local storage', [{text: 'Close', style: 'cancel'}])
 						console.log("trying to get user from local storage")
 						const cred = await AsyncStorage.getItem("user")
+						
+						if(!cred){
+							throw new Error ('No local user saved')
+						}
+						
+						// Alert.alert('User?', user.user.uid, [{text: 'Close', style: 'cancel'}])
 						console.log('test')
 						console.log('local user')
 						console.log(JSON.parse(cred))
@@ -94,27 +94,17 @@ const GlobalStateProvider = ({ children }) => {
 
 							return
 						}
+
 						const idToken = user?._tokenResponse?.idToken
-						// const userCred = signInWithCredential(idToken)
-						console.log(user)
+						
 						await dispatch({
 							...state,
 							user: {
-								uid: user.user.uid,
-								isAnonymous: user.user.isAnonymous ? true : false,
+								uid: user.uid,
+								isAnonymous: user.isAnonymous ? true : false,
 								id_token: idToken ? idToken : null
 							}
 						})
-
-						// await signInWithCredential(auth, userCredential).then(async (data) => {
-						// 	console.log('here')
-						// 	console.log(data)
-						// }).catch(err => {
-						// 	console.log('error')
-						// 	throw err
-						// })
-						// there is no user
-
 					} catch (err) {
 						// Alert.alert('Local Err', JSON.stringify(err), [{text: 'Close', style: 'cancel'}])
 
@@ -128,9 +118,9 @@ const GlobalStateProvider = ({ children }) => {
 		startAuth()
 	}, [])
 
-	useEffect(() => {
-		console.log("updated state: ", state)
-	}, [state])
+	// useEffect(() => {
+	// 	console.log("updated state: ", state)
+	// }, [state])
 
 	return (
 		<GlobalStateContext.Provider value={state}>

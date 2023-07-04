@@ -6,132 +6,6 @@ import * as Location from 'expo-location'
 import { useGlobalState } from '../Context'
 // import * as Sentry from 'sentry-expo'
 
-
-
-const storageUnitItems = [
-	{
-		label: 'Baseball Bat',
-		container: 1,
-		description: 'A wooden baseball bat for playing the sport.',
-	},
-	{
-		label: 'Motorcycle Gloves',
-		container: 2,
-		description: 'Protective gloves for motorcycle riders.',
-	},
-	{
-		label: 'Hiking Boots',
-		container: 3,
-		description: 'Sturdy boots for hiking and outdoor activities.',
-	},
-	{
-		label: 'Camera Lens',
-		container: 4,
-		description: 'A high-quality lens for photography.',
-	},
-	{
-		label: 'Golf Clubs',
-		container: 1,
-		description: 'A set of golf clubs for playing the sport.',
-	},
-	{
-		label: 'Tennis Racket',
-		container: 2,
-		description: 'A racket used for playing tennis.',
-	},
-	{
-		label: 'Cooking Pot',
-		container: 5,
-		description: 'A large pot used for cooking meals.',
-	},
-	{
-		label: 'Ski Boots',
-		container: 6,
-		description: 'Boots for skiing in snowy slopes.',
-	},
-	{
-		label: 'Yoga Mat',
-		container: 7,
-		description: 'A mat used for yoga and exercise routines.',
-	},
-	{
-		label: 'Soccer Ball',
-		container: 8,
-		description: 'A ball used for playing soccer.',
-	},
-	{
-		label: 'Paintbrushes',
-		container: 9,
-		description: 'Various brushes used for painting.',
-	},
-	{
-		label: 'Headphones',
-		container: 10,
-		description: 'A pair of headphones for listening to music.',
-	},
-	{
-		label: 'Camping Tent',
-		container: 11,
-		description: 'A tent for camping and outdoor adventures.',
-	},
-	{
-		label: 'Fishing Rod',
-		container: 12,
-		description: 'A rod used for fishing in lakes or rivers.',
-	},
-	{
-		label: 'Sewing Machine',
-		container: 13,
-		description: 'A machine used for sewing and stitching fabrics.',
-	},
-	{
-		label: 'Toolbox',
-		container: 14,
-		description: 'A box containing various tools for repairs.',
-	},
-	{
-		label: 'Surfboard',
-		container: 15,
-		description: 'A board used for surfing in ocean waves.',
-	},
-	{
-		label: 'Laptop',
-		container: 16,
-		description: 'A portable computer for work or entertainment.',
-	},
-	{
-		label: 'Guitar',
-		container: 17,
-		description: 'A musical instrument with strings for playing music.',
-	},
-	{
-		label: 'Dumbbells',
-		container: 18,
-		description: 'Weights used for strength training exercises.',
-	},
-	{
-		label: 'Binoculars',
-		container: 19,
-		description: 'Optical devices for long-distance viewing.',
-	},
-	{
-		label: 'Backpack',
-		container: 20,
-		description: 'A bag worn on the back for carrying belongings.',
-	},
-	{
-		label: 'Chess Set',
-		container: 21,
-		description: 'A set of pieces used for playing chess.',
-	},
-	{
-		label: 'Scuba Gear',
-		container: 22,
-		description: 'Equipment used for scuba diving underwater.',
-	}
-	// Add more items as needed
-]
-
 const styles = {
 	container: {
 		// flex: 100,
@@ -269,7 +143,7 @@ const Dashboard = () => {
 	const filterItems = (text) => {
 		// Filter the items based on the search text
 
-		const filteredItems = storageUnitItems.filter((item, index) => {
+		const filteredItems = state.items.filter((item, index) => {
 			return item.label.toLowerCase().indexOf(text.toLowerCase()) > -1
 		}) // Replace with your actual filtering logic
 		setFilteredItems(filteredItems)
@@ -335,6 +209,7 @@ const Dashboard = () => {
 			{/* Render additional item details as needed */}
 		</View>
 	)
+
 	const messages = [
 		"Oh that's where that went",
 		"Clean your room",
@@ -342,9 +217,10 @@ const Dashboard = () => {
 		"I'm a messy creative type too",
 		"Seems like you should have cubbies",
 		"You can use shelves in findable too",
-		"That's a lot of stuff",
+		`That's ${state.items.length > 15 ? 'a lot' : 'not a lot'} of stuff`,
 		"It's like a clown car in here",
-		"Insurance companies hate findable"
+		"Insurance companies hate findable",
+		"Use findable to create insurance claims"
 	]
 
 	return (

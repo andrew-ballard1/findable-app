@@ -13,23 +13,24 @@ const DeleteBoxDialog = ({ boxDetails, cancelDelete, deleteAllItems, deleteBoxOn
 
 	useEffect(() => {
 		console.log(boxId)
-		if (boxId && dialogAnimation < 1) {
+		if (boxId && dialogAnimation.__getValue() < 0.99) {
 			Animated.spring(dialogAnimation, {
 				toValue: 1,
 				useNativeDriver: true,
 			}).start()
-		} else if(!boxId && dialogAnimation > 0) {
+		} else if(!boxId && dialogAnimation.__getValue() > 0.01) {
 			Animated.spring(dialogAnimation, {
 				toValue: 0,
 				useNativeDriver: true,
 			}).start()
 		}
-	}, [boxId])
+	}, [isVisible])
 
 	const dialogTranslateY = dialogAnimation.interpolate({
 		inputRange: [0, 1],
 		outputRange: [300, -50]
 	})
+
 	return (
 		<View style={[styles.container]}>
 			{isVisible && (

@@ -94,10 +94,12 @@ const styles = StyleSheet.create({
 		// wrap: 'nowrap'
 	},
 	message: {
+		flex: 1,
 		fontSize: 20,
 		fontWeight: 'bold',
-		height: 40,
-		minHeight: 40
+		marginVertical: 10
+		// height: 40,
+		// minHeight: 40
 	},
 })
 

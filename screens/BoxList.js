@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, Button, FlatList, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, Button, FlatList, TouchableOpacity, StyleSheet, Dimensions } from 'react-native'
 import EmptyListComponent from '../components/EmptyListComponent'
 import DeleteBoxDialog from '../components/DeleteBoxDialog'
 import { DeleteIcon } from '../svgs/Icons'
@@ -10,20 +10,37 @@ import { useGlobalState } from '../Context'
 import { useNavigation } from '@react-navigation/native'
 
 const BoxList = ({ route }) => {
-	console.log(route.params)
 	const isDeleting = route.params.isDeleting || false
 	const isAdding = route.params.isAdding || false
+
+	const [state, dispatch] = useGlobalState()
+
+	useEffect(() => {
+		// if we route here and the route params specify we're adding, update the state first
+		const updateState = async () => {
+			if(isAdding){
+				// may need to await this
+				await dispatch({...state, modal: {...state.modal, addBox: true}})
+			} else {
+				await dispatch({...state, modal: {...state.modal, addBox: false}})
+			}
+		}
+		updateState()
+		console.log(state)
+
+	}, [isAdding])
 
 	const [viewMode, setViewMode] = useState('grid')
 	const [boxes, setBoxes] = useState([])
 	const [showDeleteDialog, setShowDeleteDialog] = useState(isDeleting)
-	const [showAddDialog, setShowAddDialog] = useState(isAdding)
-	const [state, dispatch] = useGlobalState()
+	const [showAddDialog, setShowAddDialog] = useState(state.modal.addBox)
 	const [deleteLoading, setDeleteLoading] = useState(false)
 
 	const navigation = useNavigation()
 
 	useEffect(() => {
+		console.log("reloading box list component")
+		console.log(route.params)
 		if(!state.user.uid){
 			return
 		}
@@ -37,14 +54,25 @@ const BoxList = ({ route }) => {
 		}
 	}, [])
 
-	const handleAddBox = () => {
+	// state will handle component rendering, global context will save UI state
+	useEffect(() => {
+		const updateState = async () => {
+			await dispatch({...state, modal:{...state.modal, addBox: showAddDialog}})
+		}
+		updateState()
+		console.log(state)
+	}, [showAddDialog])
+
+
+	const handleAddBox = async () => {
 		// Logic to add a new box
-		console.log("Adding box")
 		setShowAddDialog(true)
 	}
 
 	const handleCancelAdd = () => {
-		setShowAddDialog(false)
+		setTimeout(() => {
+			setShowAddDialog(false)
+		, 500})
 	}
 
 	const promptDelete = ({ label, boxId }) => {
@@ -171,8 +199,10 @@ const BoxList = ({ route }) => {
 				/>
 			)}
 
-			<AddBoxDialog isVisible={showAddDialog} handleCancel={handleCancelAdd} />
-			<DeleteBoxDialog style={{ position: 'absolute' }} deleteLoading={deleteLoading} boxDetails={showDeleteDialog} cancelDelete={() => promptDelete(false)} deleteAllItems={deleteAllItems} deleteBoxOnly={deleteBoxOnly} isVisible={true} />
+
+			{/* consider moving these up to the root level and controlling them via global context */}
+			<AddBoxDialog isVisible={state.modal.addBox} handleCancel={handleCancelAdd} />
+			<DeleteBoxDialog deleteLoading={deleteLoading} boxDetails={showDeleteDialog} cancelDelete={() => promptDelete(false)} deleteAllItems={deleteAllItems} deleteBoxOnly={deleteBoxOnly} isVisible={true} />
 		</View>
 	)
 }
@@ -254,8 +284,6 @@ const styles = StyleSheet.create({
 		backgroundColor: colors.lightgrey.hex,
 		color: colors.lightgrey.fontColor
 	},
-
-
 	deleteButton: {
 		backgroundColor: colors.error.hex,
 		padding: 8,
@@ -288,7 +316,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 20,
 		paddingTop: 20,
 		overflow: 'hidden',
-		height: '100%',
+		height: Dimensions.get("screen").height,
 	},
 	header: {
 		flexDirection: 'row',
