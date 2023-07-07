@@ -8,17 +8,16 @@ import AddItemDialog from '../components/AddItemDialog'
 import { deleteItem, getItems } from '../helpers/itemHelpers'
 import { useGlobalState } from '../Context'
 
-const Box = ({route}) => {
+const Box = ({ route }) => {
 	const [viewMode, setViewMode] = useState('line')
 	const [items, setItems] = useState([])
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-	const [showAddDialog, setShowAddDialog] = useState(route.params.isAdding)
 	const [state, dispatch] = useGlobalState()
 	const [deleteLoading, setDeleteLoading] = useState(false)
-	const boxId = route.params.boxId
+	const { boxId, boxLabel } = route.params
 
 	useEffect(() => {
-		const unsubItems = getItems({uid: state.user.uid, boxId}, (items) => {
+		const unsubItems = getItems({ uid: state.user.uid, boxId }, (items) => {
 			setItems(items)
 		})
 
@@ -28,22 +27,20 @@ const Box = ({route}) => {
 		}
 	}, [])
 
-	const handleAddItem = () => {
+	const handleAddItem = async () => {
 		// Logic to add a new box
 		console.log("Adding item")
-		setShowAddDialog(true)
+		await dispatch({ ...state, modal: { ...state.modal, addItem: true } })
+		// setShowAddDialog(true)
 	}
 
-	const handleCancelAdd = () => {
-		setShowAddDialog(false)
-	}
-
-	const promptDelete = (label) => {
+	const promptDelete = async ({ label, itemId }) => {
 		// string label or false
-		setShowDeleteDialog(label)
+		// setShowDeleteDialog(label)
+		await dispatch({ ...state, modal: { ...state.modal, deleteItem: { label, itemId } } })
 	}
 
-	const handleDeleteItem = async ({label, itemId}) => {
+	const handleDeleteItem = async ({ label, itemId }) => {
 		// make call to delete item
 		console.log(`Delete Item ${label}`)
 		setDeleteLoading(true)
@@ -73,15 +70,15 @@ const Box = ({route}) => {
 
 	const renderItemLineItem = ({ item }) => (
 		<View style={styles.itemLine}>
-			<Text style={[styles.itemLabelLine, { flex: 1 }]}>{item.label}</Text>
-			<View style={{ flex: 3, display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-				<Text style={styles.itemDescription}>{item.description}</Text>
-				{/* <Text style={styles.itemCount}>{item.items.length} thing{item.items.length != 1 ? 's' : ''}</Text> */}
+			<View style={{ width: '80%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start' }}>
+				<Text style={[styles.itemLabelLine, { flex: 1 }]}>{item.label}</Text>
+				{/* <Text style={styles.itemDescription}>{item.description}</Text> */}
+				<Text numberOfLines={1} ellipsizeMode={'clip'}>{item.description}</Text>
 			</View>
 
 			<TouchableOpacity
 				style={[styles.deleteButton, { marginLeft: 10 }]}
-				onPress={() => promptDelete(item.label)}
+				onPress={() => promptDelete({ label: item.label, itemId: item.id })}
 			>
 				<Text style={styles.deleteButtonText}>Delete</Text>
 			</TouchableOpacity>
@@ -91,22 +88,29 @@ const Box = ({route}) => {
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
-				<Text style={styles.title}>Your Things</Text>
+				<Text style={styles.title}>{boxLabel}</Text>
 				<View style={styles.viewModeButtons}>
-					<Button
-						title="Grid View"
+					<TouchableOpacity
+						style={[styles.dialogButton, viewMode == 'grid' ? styles.blueButton : styles.greyButton]}
 						onPress={() => setViewMode('grid')}
-						disabled={viewMode === 'grid'}
-					/>
-					<Button
-						title="Line View"
+					>
+						<Text style={styles.buttonText}>Grid</Text>
+					</TouchableOpacity>
+					<TouchableOpacity
+						style={[styles.dialogButton, viewMode == 'line' ? styles.blueButton : styles.greyButton]}
 						onPress={() => setViewMode('line')}
-						disabled={viewMode === 'line'}
-					/>
+					>
+						<Text style={styles.buttonText}>Line</Text>
+					</TouchableOpacity>
 				</View>
 			</View>
 
-			<Button title="Add New Item" onPress={handleAddItem} />
+			<TouchableOpacity
+				style={[styles.buttonContainer, styles.blueButton]}
+				onPress={handleAddItem}
+			>
+				<Text style={styles.buttonText}>Add New Item</Text>
+			</TouchableOpacity>
 
 			{viewMode === 'grid' ? (
 				<FlatList
@@ -126,8 +130,8 @@ const Box = ({route}) => {
 				/>
 			)}
 
-			{/* <AddItemDialog isVisible={showAddDialog} handleCancel={handleCancelAdd} />
-			<DeleteItemDialog style={{ position: 'fixed' }} deleteLoading={deleteLoading} itemDetails={showDeleteDialog} cancelDelete={() => promptDelete(false)} deleteItem={handleDeleteItem} isVisible={true} /> */}
+			<AddItemDialog box={boxId} />
+			<DeleteItemDialog />
 		</View>
 	)
 }
@@ -160,6 +164,39 @@ const styles = StyleSheet.create({
 		fontWeight: 400,
 		textAlign: 'center',
 	},
+	buttonText: {
+		color: 'white',
+		fontSize: 16,
+		fontWeight: 'bold',
+		textAlign: 'center',
+		minWidth: 80
+	}, buttonContainer: {
+		flexDirection: 'column',
+		justifyContent: 'center',
+		height: 40,
+		borderRadius: 5,
+		marginBottom: 15,
+		width: '100%'
+	},
+	dialogButton: {
+		flex: 1,
+		paddingVertical: 10,
+		borderRadius: 5,
+		// marginHorizontal: 10,
+	},
+	redButton: {
+		backgroundColor: colors.error.hex,
+		color: colors.error.fontColor
+	},
+	blueButton: {
+		backgroundColor: colors.primary.hex,
+		color: colors.primary.fontColor
+	},
+	greyButton: {
+		backgroundColor: colors.lightgrey.hex,
+		color: colors.lightgrey.fontColor
+	},
+
 	container: {
 		flex: 1,
 		paddingHorizontal: 20,

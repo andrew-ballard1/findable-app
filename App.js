@@ -9,7 +9,7 @@ import Footer from './components/Footer'
 import ContentContainer from './components/ContentContainer'
 import Landing from './components/Landing'
 import Loading from './components/Loading'
-import ItemView from './screens/ItemView'
+import ItemList from './screens/ItemList'
 import { useGlobalState } from './Context'
 import * as Location from 'expo-location'
 import * as Notifications from 'expo-notifications'
@@ -98,7 +98,7 @@ const App = () => {
 							<Stack.Screen name="findable" component={Dashboard} />
 							<Stack.Screen name="Boxes" component={BoxList} />
 							<Stack.Screen name="Stuff" component={Box} />
-							<Stack.Screen name="Items" component={ItemView} />
+							<Stack.Screen name="Items" component={ItemList} />
 							<Stack.Screen name="Account" component={Account} />
 						</Stack.Navigator>
 						<Footer user={{ isAnonymous: state.user.isAnonymous }} />

@@ -8,12 +8,9 @@ import AddItemDialog from '../components/AddItemDialog'
 import { deleteItem, getItems } from '../helpers/itemHelpers'
 import { useGlobalState } from '../Context'
 
-const ItemView = ({ route }) => {
-	console.log(route.params)
-	const [viewMode, setViewMode] = useState('line')
+const ItemList = ({ route }) => {
 	const [items, setItems] = useState([])
-	const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-	const [showAddDialog, setShowAddDialog] = useState(route.params.isAdding)
+	const isAdding = route.params.isAdding ? true : false
 	const [state, dispatch] = useGlobalState()
 	const [deleteLoading, setDeleteLoading] = useState(false)
 
@@ -21,35 +18,25 @@ const ItemView = ({ route }) => {
 		const unsubItems = getItems({ uid: state.user.uid }, (items) => {
 			setItems(items)
 		})
+		if(isAdding){
+			dispatch({...state, modal: {...state.modal, addItem: true}})
+		}
+
+		console.log("loaded ItemList")
 
 		return () => {
 			console.log("Unsubscribing from items")
 			unsubItems()
 		}
+
 	}, [])
 
-	const handleAddItem = () => {
-		// Logic to add a new box
-		console.log("Adding item")
-		setShowAddDialog(true)
+	const handleAddItem = async () => {
+		await dispatch({...state, modal: {...state.modal, addItem: true}})
 	}
 
-	const handleCancelAdd = () => {
-		setShowAddDialog(false)
-	}
-
-	const promptDelete = (label) => {
-		// string label or false
-		setShowDeleteDialog(label)
-	}
-
-	const handleDeleteItem = async ({ label, itemId }) => {
-		// make call to delete item
-		console.log(`Delete Item ${label}`)
-		setDeleteLoading(true)
-		await deleteItem(itemId)
-		setDeleteLoading(false)
-		promptDelete(false)
+	const promptDelete = async ({label, itemId}) => {
+		await dispatch({...state, modal: {...state.modal, deleteItem: {label, itemId}}})
 	}
 
 	const renderItemGridItem = ({ item, index }) => {
@@ -64,7 +51,7 @@ const ItemView = ({ route }) => {
 				</TouchableOpacity>
 
 				<Text style={styles.itemLabel}>{item.label}</Text>
-				<Text style={styles.itemDescription}>{item.description}</Text>
+				<Text numberOfLines={1} ellipsizeMode={'tail'} style={styles.itemDescription}>{item.description}</Text>
 				{/* <Text style={styles.itemGrid}>{item.items.length} thing{item.items.length != 1 ? 's' : ''}</Text> */}
 				<Text style={styles.itemLastAccessed}>Opened {item.lastOpened}</Text>
 			</TouchableOpacity>
@@ -73,15 +60,14 @@ const ItemView = ({ route }) => {
 
 	const renderItemLineItem = ({ item }) => (
 		<View style={styles.itemLine}>
-			<Text style={[styles.itemLabelLine, { flex: 1 }]}>{item.label}</Text>
-			<View style={{ flex: 3, display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-				<Text style={styles.itemDescription}>{item.description}</Text>
-				{/* <Text style={styles.itemCount}>{item.items.length} thing{item.items.length != 1 ? 's' : ''}</Text> */}
+			<View style={{ width: '80%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start' }}>
+				<Text style={[styles.itemLabelLine, { flex: 1 }]}>{item.label}</Text>
+				<Text numberOfLines={1} ellipsizeMode={'clip'}>{item.description}</Text>
 			</View>
 
 			<TouchableOpacity
 				style={[styles.deleteButton, { marginLeft: 10 }]}
-				onPress={() => promptDelete(item.label)}
+				onPress={() => promptDelete({label: item.label, itemId: item.id})}
 			>
 				<Text style={styles.deleteButtonText}>Delete</Text>
 			</TouchableOpacity>
@@ -94,7 +80,12 @@ const ItemView = ({ route }) => {
 				<Text style={[styles.title, { textAlign: 'center' }]}>Your Things</Text>
 			</View>
 
-			<Button title="Add New Item" onPress={handleAddItem} />
+			<TouchableOpacity
+				style={[styles.buttonContainer, styles.blueButton]}
+				onPress={handleAddItem}
+			>
+				<Text style={styles.buttonText}>Add New Item</Text>
+			</TouchableOpacity>
 
 			<FlatList
 				style={{ height: 900, minHeight: '100%' }}
@@ -105,8 +96,8 @@ const ItemView = ({ route }) => {
 				numColumns={1}
 			/>
 
-			<AddItemDialog isVisible={showAddDialog} handleCancel={handleCancelAdd} />
-			<DeleteItemDialog style={{ position: 'absolute' }} deleteLoading={deleteLoading} itemDetails={showDeleteDialog} cancelDelete={() => promptDelete(false)} deleteItem={handleDeleteItem} isVisible={true} />
+			<AddItemDialog />
+			<DeleteItemDialog />
 		</View>
 	)
 }
@@ -139,9 +130,41 @@ const styles = StyleSheet.create({
 		fontWeight: 400,
 		textAlign: 'center',
 	},
+	buttonText: {
+		color: 'white',
+		fontSize: 16,
+		fontWeight: 'bold',
+		textAlign: 'center',
+		minWidth: 80
+	},	buttonContainer: {
+		flexDirection: 'column',
+		justifyContent: 'center',
+		height: 40,
+		borderRadius: 5,
+		marginBottom: 15,
+		width: '100%'
+	},
+	dialogButton: {
+		flex: 1,
+		paddingVertical: 10,
+		borderRadius: 5,
+		// marginHorizontal: 10,
+	},
+	redButton: {
+		backgroundColor: colors.error.hex,
+		color: colors.error.fontColor
+	},
+	blueButton: {
+		backgroundColor: colors.primary.hex,
+		color: colors.primary.fontColor
+	},
+	greyButton: {
+		backgroundColor: colors.lightgrey.hex,
+		color: colors.lightgrey.fontColor
+	},
+
 	container: {
-		flex: 0,
-		height: Dimensions.get("screen").height,
+		flex: 1,
 		paddingHorizontal: 20,
 		paddingTop: 20,
 		overflow: 'hidden'
@@ -182,14 +205,14 @@ const styles = StyleSheet.create({
 	},
 	itemLine: {
 		flexDirection: 'row',
-		alignItems: 'center',
+		// alignItems: 'center',
 		padding: 10,
 		borderBottomWidth: 1,
 		borderBottomColor: '#E0E0E0',
 		justifyContent: 'space-between',
 		// justifyContent: 'center',
-		alignItems: 'center',
-		alignContent: 'center'
+		// alignItems: 'center',
+		// alignContent: 'center'
 
 	},
 	itemLabel: {
@@ -201,6 +224,7 @@ const styles = StyleSheet.create({
 		fontWeight: 'bold',
 	},
 	itemDescription: {
+		width: 200,
 		fontSize: 14,
 		display: 'flex',
 	},
@@ -222,4 +246,4 @@ const styles = StyleSheet.create({
 	},
 })
 
-export default ItemView
+export default ItemList

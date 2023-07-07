@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { View, StyleSheet } from 'react-native'
 import { Picker } from '@react-native-picker/picker'
 
-const Dropdown = ({options = [{value: '', label: ''}], setter}) => {
-	const [selectedValue, setSelectedValue] = useState(options[0]?.value ? options[0].value : '')
+const Dropdown = ({options = [{value: '', label: ''}], setter, selected}) => {
+	const [selectedValue, setSelectedValue] = useState(selected ? selected : '')
 
 	return (
 		<View style={styles.container}>
 			<Picker
-			style={{width: '100%', height: '100%', border: 'none'}}
+				style={{width: '100%', height: '100%'}}
 				selectedValue={selectedValue}
 				onValueChange={(value) => {
 					setter(value)
@@ -32,7 +32,8 @@ const styles = StyleSheet.create({
 		minHeight: 40,
 		borderWidth: 1,
 		borderColor: '#eeeeee',
-		color: '#333333'
+		color: '#333333',
+		borderRadius: 5
 	},
 })
 

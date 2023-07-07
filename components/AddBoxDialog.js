@@ -1,71 +1,56 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, KeyboardAvoidingView, Platform, Keyboard, Dimensions, Alert } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, Keyboard } from 'react-native'
 
 import colors from '../colors'
 import { addBox } from '../helpers/boxHelpers'
 import { useGlobalState } from '../Context'
 import { getItemsOnce } from '../helpers/itemHelpers'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import Modal from 'react-native-modal'
 
-const AddBoxDialog = ({ handleCancel, isVisible = false }) => {
-	let dialogAnimation = null 
+const AddBoxDialog = () => {
+	const [state, dispatch] = useGlobalState()
 
 	const [label, setLabel] = useState('')
 	const [description, setDescription] = useState('')
 	const [buttonText, setButtonText] = useState('Add Box')
-	const [items, setItems] = useState([])
-	const [state, dispatch] = useGlobalState()
+	// const [items, setItems] = useState(false)
 
-	useEffect(() => {
-		console.log('reloading dialog component')
-		const getItemList = async () => {
-			const itemList = await getItemsOnce(state.user.uid)
-			setItems(itemList)
-		}
-		if (state.user.uid) {
-			getItemList()
-		}
-	}, [])
+	// const { bottom } = useSafeAreaInsets()
 
+	// useEffect(() => {
+	// 	const getItemList = async () => {
+	// 		const itemList = await getItemsOnce(state.user.uid)
+	// 		setItems(itemList)
+	// 	}
 
-	useEffect(() => {
-		dialogAnimation = new Animated.Value(state.modal.addBox ? -50 : 300)
-		dialogAnimation.stopAnimation()
-		// if (isVisible) {
-		Animated.timing(dialogAnimation, {
-			toValue: isVisible ? -50 : 300,
-			useNativeDriver: true,
-			duration: 1000
-		}).start()
-		console.log('isVisible hook')
-		console.log(isVisible)
-	}, [isVisible])
+	// 	if (state.user.uid) {
+	// 		getItemList()
+	// 	}
+	// }, [])
 
-	// const dialogTranslateY = dialogAnimation.interpolate({
-	// 	inputRange: [0, 1],
-	// 	outputRange: [300, -50]
-	// })
-	// dialogAnimation.addListener((val) => {
-	// 	console.log(val)
-	// })
 
 	const handleAddBox = async () => {
 		setButtonText("Adding...")
 		const boxId = await addBox({ label, description }, state.user.uid)
+		
 		console.log(`Added ${boxId}`)
+		
 		setLabel('')
 		setDescription('')
 		setButtonText("Done!")
-		setTimeout(() => {
+		await dispatch({...state, modal:{...state.modal, addBox: false}})
+		
+		setTimeout(async () => {
 			setButtonText("Add Box")
-			handleCancel()
 		}, 500)
+		
 		// I should probably add a try catch here
-
 	}
 
-	const cancel = () => {
-		handleCancel()
+	const cancel = async () => {
+		await dispatch({...state, modal:{...state.modal, addBox: false}})
+
 		setTimeout(() => {
 			setDescription('')
 			setLabel('')
@@ -73,76 +58,72 @@ const AddBoxDialog = ({ handleCancel, isVisible = false }) => {
 	}
 
 	return (
-		<KeyboardAvoidingView
-			style={{ flex: 1 }}
-			behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
-			keyboardVerticalOffset={140}
-		>
-			<View 
-				style={[styles.container,
-				// {
-				// 	transform: [{ translateY: dialogAnimation }],
-				// },
-			]}>
-				<Animated.View
-					style={[
-						styles.dialogContainer,
-						{
-							transform: [{ translateY: dialogAnimation }],
-						},
-					]}
-				>
-					<View style={styles.dialogContent}>
-						<Text style={styles.dialogText}>
-							{label.length > 0 ? `Adding "${label}"` : "Add a new box of Stuff!"}
-						</Text>
-						<View
-							style={{ display: 'flex', flexDirection: 'column', flex: 1, width: '100%', padding: 10, marginBottom: 20 }}
-						>
-							<TextInput
-								style={styles.dialogInput}
-								placeholder="Label..."
-								placeholderTextColor="#999999"
-								value={label}
-								onChangeText={text => setLabel(text)}
-								scrollEnabled={true}
-								autoCapitalize='none'
-							/>
-							<TextInput
-								style={styles.dialogInput}
-								placeholder="Description..."
-								placeholderTextColor="#999999"
-								value={description}
-								onChangeText={text => setDescription(text)}
-								scrollEnabled={true}
-								autoCapitalize='none'
-							/>
-						</View>
+		// <KeyboardAvoidingView
+		// 	// style={{ flex: 1 }}
+		// 	behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
+		// 	keyboardVerticalOffset={140}
+		// >
+			<Modal
+				animationIn='slideInUp'
+				animationOut='slideOutDown'
+				isVisible={state.modal.addBox}
+				transparent={true}
+				avoidKeyboard={true}
+			>
+				<View style={[styles.container]}>
+					<View style={styles.dialogContainer}>
+						<View style={styles.dialogContent}>
+							<Text style={styles.dialogText}>
+								{label.length > 0 ? `Adding "${label}"` : "Add a new box of Stuff!"}
+							</Text>
+							<View
+								style={{ display: 'flex', flexDirection: 'column', flex: 1, width: '100%', padding: 10, marginBottom: 20 }}
+							>
+								<TextInput
+									style={styles.dialogInput}
+									placeholder="Label..."
+									placeholderTextColor="#999999"
+									value={label}
+									onChangeText={text => setLabel(text)}
+									scrollEnabled={true}
+									autoCapitalize='none'
+								/>
+								<TextInput
+									style={styles.dialogInput}
+									placeholder="Description..."
+									placeholderTextColor="#999999"
+									value={description}
+									onChangeText={text => setDescription(text)}
+									scrollEnabled={true}
+									autoCapitalize='none'
+								/>
+							</View>
 
-						<View style={[styles.addBoxButtonContainer, { marginBottom: 20, flexDirection: 'row' }]}>
-							<TouchableOpacity
-								style={[styles.dialogButton, styles.blueButton]}
-								onPress={() => {
-									Keyboard.dismiss()
-									handleAddBox()
-								}}
-							>
-								<Text numberOfLines={1} style={styles.buttonText}>{buttonText}</Text>
-							</TouchableOpacity>
-							<TouchableOpacity
-								style={[styles.dialogButton, styles.greyButton]}
-								onPress={() => {
-									Keyboard.dismiss()
-									cancel()
-								}}
-							>
-								<Text style={styles.buttonText}>Cancel</Text>
-							</TouchableOpacity>
+							<View style={[styles.addBoxButtonContainer, { marginBottom: 20, flexDirection: 'row' }]}>
+								<TouchableOpacity
+									style={[styles.dialogButton, styles.blueButton]}
+									onPress={() => {
+										Keyboard.dismiss()
+										handleAddBox()
+									}}
+								>
+									<Text numberOfLines={1} style={styles.buttonText}>{buttonText}</Text>
+								</TouchableOpacity>
+								<TouchableOpacity
+									style={[styles.dialogButton, styles.greyButton]}
+									onPress={() => {
+										Keyboard.dismiss()
+										cancel()
+									}}
+								>
+									<Text style={styles.buttonText}>Cancel</Text>
+								</TouchableOpacity>
+							</View>
 						</View>
 					</View>
-				</Animated.View>
-			</View>
-		</KeyboardAvoidingView>
+				</View>
+			</Modal>
+		// </KeyboardAvoidingView >
 	)
 }
 
@@ -150,13 +131,10 @@ const styles = StyleSheet.create({
 	container: {
 		display: 'flex',
 		width: '100%',
-		alignSelf: 'center',
 		flex: 1,
-		justifyContent: 'center',
+		justifyContent: 'flex-end',
 		alignItems: 'center',
-		bottom: 0,
-		// top: Dimensions.get('screen').height,
-		// height: 250
+		paddingBottom: 70
 	},
 	deleteButton: {
 		backgroundColor: 'red',
@@ -188,7 +166,6 @@ const styles = StyleSheet.create({
 		borderRadius: 10,
 		shadowColor: '#000',
 		width: '100%',
-		// flex: 0,
 		shadowOffset: { width: 0, height: -2 },
 		shadowOpacity: 0.1,
 		shadowRadius: 4,

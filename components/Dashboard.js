@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { View, Text, TextInput, TouchableOpacity, FlatList, Animated, Dimensions } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, FlatList, Animated } from 'react-native'
 import VerticalCarousel from './VerticalCarousel'
 import { useNavigation } from '@react-navigation/native'
 import * as Location from 'expo-location'
@@ -90,12 +90,8 @@ const animations = []
 
 const Dashboard = () => {
 	const [searchText, setSearchText] = useState('')
-	const [showButtons, setShowButtons] = useState(true)
-	const [flexGrow, setFlexGrow] = useState(0)
 	const [filteredItems, setFilteredItems] = useState([])
 	// const searchContainerHeight = useRef(new Animated.Value(40)).current;
-	const searchResultsOpacity = useRef(new Animated.Value(1)).current
-	const searchResultsHeight = useRef(new Animated.Value(0)).current
 	const buttonsOpacity = useRef(new Animated.Value(1)).current
 
 	const [location, setLocation] = useState(null)
@@ -128,6 +124,7 @@ const Dashboard = () => {
 			try {
 				getLocation()
 			} catch (error) {
+				console.log(error)
 				// Sentry.Native.captureException(error)
 			}
 		}
@@ -137,7 +134,7 @@ const Dashboard = () => {
 	const handleSearchTextChange = (text) => {
 		setSearchText(text)
 		filterItems(text)
-		animateSearchContainer(text)
+		// animateSearchContainer(text)
 	}
 
 	const filterItems = (text) => {
@@ -147,54 +144,6 @@ const Dashboard = () => {
 			return item.label.toLowerCase().indexOf(text.toLowerCase()) > -1
 		}) // Replace with your actual filtering logic
 		setFilteredItems(filteredItems)
-	}
-
-
-	
-	const animateSearchContainer = (text) => {
-		if (text.length > 0) {
-			if (animations.length == 0) {
-				setFlexGrow(1)
-				const searchOpacity = Animated.timing(searchResultsOpacity, {
-					toValue: 1,
-					duration: 200,
-					useNativeDriver: true,
-				}).start()
-				const searchHeight = Animated.timing(searchResultsHeight, {
-					toValue: 10,
-					duration: 200,
-					useNativeDriver: true,
-				}).start()
-				// const buttonOpacity = Animated.timing(buttonsOpacity, {
-				// 	toValue: 0,
-				// 	duration: 200,
-				// 	useNativeDriver: true
-				// }).start()
-				animations.push({ searchOpacity, searchHeight, buttonsOpacity })
-				setTimeout(() => {
-					animations.pop()
-					animations.pop()
-					animations.pop()
-				}, 200)
-			}
-		} else {
-			setFlexGrow(0)
-			Animated.timing(searchResultsOpacity, {
-				toValue: 0,
-				duration: 200,
-				useNativeDriver: true,
-			}).start()
-			Animated.timing(searchResultsHeight, {
-				toValue: 0,
-				duration: 200,
-				useNativeDriver: true,
-			}).start()
-			// Animated.timing(buttonsOpacity, {
-			// 	toValue: 1,
-			// 	duration: 200,
-			// 	useNativeDriver: true
-			// }).start()
-		}
 	}
 
 	const renderButton = (title, onPress) => (
@@ -220,7 +169,7 @@ const Dashboard = () => {
 		`That's ${state.items.length > 15 ? 'a lot' : 'not a lot'} of stuff`,
 		"It's like a clown car in here",
 		"Insurance companies hate findable",
-		"Use findable to create insurance claims"
+		"Use findable for insurance claims"
 	]
 
 	return (
@@ -232,14 +181,14 @@ const Dashboard = () => {
 			{/* <Text style={styles.header}>
 			</Text> */}
 
-			<Animated.View style={[styles.searchContainer]} >
+			<View style={[styles.searchContainer]} >
 				<TextInput
 					style={styles.searchBar}
 					placeholder="Search..."
 					value={searchText}
 					onChangeText={handleSearchTextChange}
 				/>
-			</Animated.View>
+			</View>
 			{/* <Animated.View style={[styles.searchResults, { opacity: searchResultsOpacity, minHeight: searchResultsHeight }]}>
 				<FlatList
 					data={filteredItems}

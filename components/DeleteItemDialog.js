@@ -1,90 +1,77 @@
-import React, { useEffect, useState } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native'
+import React, { useState } from 'react'
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 
 import colors from '../colors'
+import { useGlobalState } from '../Context'
+import Modal from 'react-native-modal'
+import Loading from './Loading'
 
-const DeleteItemDialog = ({ itemDetails, cancelDelete, deleteItem, isVisible = true }) => {
-	const {itemId, label} = itemDetails
-	const dialogAnimation = new Animated.Value(0)
-	useEffect(() => {
-		console.log(dialogAnimation.__getValue())
-		dialogAnimation.setValue(0)
-	}, [])
+import { deleteItem } from '../helpers/itemHelpers'
 
-	useEffect(() => {
-		console.log(itemId)
-		if (itemId && dialogAnimation.__getValue() < 0.99) {
-			Animated.spring(dialogAnimation, {
-				toValue: 1,
-				useNativeDriver: true,
-			}).start()
-		} else if(!itemId && dialogAnimation.__getValue() > 0.01) {
-			Animated.spring(dialogAnimation, {
-				toValue: 0,
-				useNativeDriver: true,
-			}).start()
-		}
-	}, [isVisible])
+const DeleteItemDialog = () => {
+	const [state, dispatch] = useGlobalState()
+	const [deleteLoading, setDeleteLoading] = useState(false)
+	const { itemId, label } = state.modal.deleteItem ? state.modal.deleteItem : false
 
-	const dialogTranslateY = dialogAnimation.interpolate({
-		inputRange: [0, 1],
-		outputRange: [300, -50]
-	})
+	const deleteSingleItem = async () => {
+		console.log(`Delete Item ${label}`)
+		setDeleteLoading(true)
+		await deleteItem(itemId)
+		setDeleteLoading(false)
+		await dispatch({ ...state, modal: { ...state.modal, deleteItem: false } })
+	}
+
+	const cancelDelete = async () => {
+		await dispatch({ ...state, modal: { ...state.modal, deleteItem: false } })
+	}
 
 	return (
-		<View style={[styles.container]}>
-			{isVisible && (
-				<Animated.View
-					style={[
-						styles.dialogContainer,
-						{
-							transform: [{ translateY: dialogTranslateY }],
-						},
-					]}
-				>
+		<Modal
+			animationIn='slideInUp'
+			animationOut='slideOutDown'
+			isVisible={state.modal.deleteItem !== false ? true : false}
+			transparent={true}
+			avoidKeyboard={true}
+		>
+			<View style={[styles.container]}>
+				<View style={[styles.dialogContainer]}>
 					<View style={styles.dialogContent}>
 						<Text style={styles.dialogText}>
-							Do you want to delete {itemId}?
+							Do you want to delete {label}?
 						</Text>
 						<View style={styles.buttonContainer}>
 							<View style={styles.topRowButtons}>
 								<TouchableOpacity
 									style={[styles.dialogButton, styles.redButton]}
-									onPress={() => deleteItem(itemId)}
+									onPress={() => deleteSingleItem()}
 								>
-									<Text style={styles.buttonText}>Box and Items</Text>
+									<Text style={styles.buttonText}>{deleteLoading ? <Loading size={'small'} color={'#ffffff'} /> : 'Delete'}</Text>
 								</TouchableOpacity>
 							</View>
 							<View>
 								<TouchableOpacity
-									style={[styles.dialogButton, styles.greyButton, {marginTop: 10}]}
-									onPress={() => cancelDelete(itemId)}
+									style={[styles.dialogButton, styles.greyButton, { marginTop: 10 }]}
+									onPress={() => cancelDelete()}
 								>
 									<Text style={styles.buttonText}>Nevermind</Text>
 								</TouchableOpacity>
 							</View>
 						</View>
 					</View>
-				</Animated.View>
-			)}
-		</View>
+				</View>
+			</View>
+		</Modal>
 	)
 }
 
 const styles = StyleSheet.create({
 	container: {
+		display: 'flex',
+		width: '100%',
 		flex: 1,
-		justifyContent: 'center',
+		justifyContent: 'flex-end',
 		alignItems: 'center',
-		width: '95%',
-		left: '2.5%',
-		position: 'absolute',
-		bottom: 0
-	},
-	deleteButton: {
-		backgroundColor: 'red',
-		padding: 10,
-		borderRadius: 5,
+		paddingBottom: 70
 	},
 	buttonText: {
 		color: 'white',
@@ -93,10 +80,6 @@ const styles = StyleSheet.create({
 		textAlign: 'center',
 	},
 	dialogContainer: {
-		position: 'absolute',
-		bottom: 0,
-		left: 0,
-		right: 0,
 		height: 200,
 		width: '100%',
 		backgroundColor: 'white',

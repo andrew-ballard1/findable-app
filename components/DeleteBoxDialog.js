@@ -1,47 +1,29 @@
 import React, { useEffect, useState } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native'
+import Modal from 'react-native-modal'
 
 import colors from '../colors'
 import Loading from './Loading'
+import { useGlobalState } from '../Context'
 
-const DeleteBoxDialog = ({ boxDetails, cancelDelete, deleteAllItems, deleteBoxOnly, isVisible = true, deleteLoading }) => {
-	const {label, boxId} = boxDetails
-	const dialogAnimation = new Animated.Value(0)
-	useEffect(() => {
-		dialogAnimation.setValue(0)
-	}, [])
+const DeleteBoxDialog = ({ boxDetails, deleteAllItems, deleteBoxOnly, deleteLoading = false }) => {
+	const { label, boxId } = boxDetails
+	const [state, dispatch] = useGlobalState()
 
-	useEffect(() => {
-		console.log(boxId)
-		if (boxId && dialogAnimation.__getValue() < 0.99) {
-			Animated.spring(dialogAnimation, {
-				toValue: 1,
-				useNativeDriver: true,
-			}).start()
-		} else if(!boxId && dialogAnimation.__getValue() > 0.01) {
-			Animated.spring(dialogAnimation, {
-				toValue: 0,
-				useNativeDriver: true,
-			}).start()
-		}
-	}, [isVisible])
-
-	const dialogTranslateY = dialogAnimation.interpolate({
-		inputRange: [0, 1],
-		outputRange: [300, -50]
-	})
+	const cancelDelete = async () => {
+		await dispatch({...state, modal:{...state.modal, deleteBox: false}})
+	}
 
 	return (
-		<View style={[styles.container]}>
-			{isVisible && (
-				<Animated.View
-					style={[
-						styles.dialogContainer,
-						{
-							transform: [{ translateY: dialogTranslateY }],
-						},
-					]}
-				>
+		<Modal
+			animationIn='slideInUp'
+			animationOut='slideOutDown'
+			isVisible={state.modal.deleteBox !== false ? true : false}
+			transparent={true}
+			avoidKeyboard={true}
+		>
+			<View style={[styles.container]}>
+				<View style={styles.dialogContainer}>
 					<View style={styles.dialogContent}>
 						<Text style={styles.dialogText}>
 							Do you want to delete everything in "{label}" too?
@@ -50,20 +32,20 @@ const DeleteBoxDialog = ({ boxDetails, cancelDelete, deleteAllItems, deleteBoxOn
 							<View style={styles.topRowButtons}>
 								<TouchableOpacity
 									style={[styles.dialogButton, styles.redButton]}
-									onPress={() => deleteAllItems({boxId, label})}
+									onPress={() => deleteAllItems({ boxId, label })}
 								>
 									<Text style={styles.buttonText}>{deleteLoading ? <Loading size={'small'} color={'#ffffff'} /> : 'Box and Items'}</Text>
 								</TouchableOpacity>
 								<TouchableOpacity
 									style={[styles.dialogButton, styles.blueButton]}
-									onPress={() => deleteBoxOnly({boxId, label})}
+									onPress={() => deleteBoxOnly({ boxId, label })}
 								>
 									<Text style={styles.buttonText}>Box Only</Text>
 								</TouchableOpacity>
 							</View>
 							<View>
 								<TouchableOpacity
-									style={[styles.dialogButton, styles.greyButton, {marginTop: 10}]}
+									style={[styles.dialogButton, styles.greyButton, { marginTop: 10 }]}
 									onPress={() => cancelDelete(boxId)}
 								>
 									<Text style={styles.buttonText}>Nevermind</Text>
@@ -71,20 +53,20 @@ const DeleteBoxDialog = ({ boxDetails, cancelDelete, deleteAllItems, deleteBoxOn
 							</View>
 						</View>
 					</View>
-				</Animated.View>
-			)}
-		</View>
+				</View>
+			</View>
+		</Modal>
 	)
 }
 
 const styles = StyleSheet.create({
 	container: {
-		flex: 1,
-		justifyContent: 'center',
-		alignItems: 'center',
+		display: 'flex',
 		width: '100%',
-		position: 'absolute',
-		bottom: 0
+		flex: 1,
+		justifyContent: 'flex-end',
+		alignItems: 'center',
+		paddingBottom: 70
 	},
 	deleteButton: {
 		backgroundColor: 'red',
@@ -98,10 +80,6 @@ const styles = StyleSheet.create({
 		textAlign: 'center',
 	},
 	dialogContainer: {
-		position: 'absolute',
-		bottom: 0,
-		left: 0,
-		right: 0,
 		height: 200,
 		backgroundColor: 'white',
 		borderRadius: 10,

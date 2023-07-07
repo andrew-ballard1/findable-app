@@ -39,7 +39,7 @@ const getItems = ({uid, boxId = null}, callback) => {
 
 		return unsubItems
 	} catch (error) {
-		console.error('Error getting boxes:', error)
+		console.error('Error getting items:', error)
 		throw error
 	}
 }

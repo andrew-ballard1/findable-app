@@ -5,6 +5,8 @@ import { getAuth, signOut } from 'firebase/auth'
 import { useGlobalState } from '../Context'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
+import SignOutDialog from '../components/SignOutDialog'
+
 const auth = getAuth(firebase)
 
 const Account = () => {
@@ -74,26 +76,31 @@ const Account = () => {
 	}
 
 	const handleSignOut = async () => {
-		await signOut(auth)
-		await dispatch({...state, user: false})
-		await AsyncStorage.removeItem('user')
+		await dispatch({ ...state, modal: { ...state.modal, signOut: true } })
 	}
 
 	if (state.user.isAnonymous) {
 		return (
-			<View style={{ padding: 20 }}>
-				<Text style={styles.textArea}>
-					You've signed up anonymously (you clicked "Skip for now" when you downloaded the app)
-				</Text>
-				<Text style={styles.textArea}>
-					We don't have an email for you, or a name, so we've just been calling you <Text style={{ fontWeight: 'bold' }}>{state.user.uid}</Text>
-				</Text>
-				<Text style={styles.textArea}>
-					You can still use the app, delete your account, tell us more about you, or contact support - wait times should be tiny, but official sign ups will get priority (sorry).
-				</Text>
-				<TouchableOpacity style={styles.cancelButton} onPress={handleSignOut}>
-					<Text style={styles.cancelButtonText}>Sign Out</Text>
-				</TouchableOpacity>
+			<View style={{ padding: 20, paddingTop: 0, paddingBottom: 70, display: 'flex', justifyContent: 'space-between', flexDirection: 'column', flex: 1 }}>
+				<SignOutDialog />
+				<View style={{flex: 1}}>
+					<Text style={styles.textArea}>I don't know who you are</Text>
+					<Text style={styles.textArea}>I don't know what you want</Text>
+					<Text style={styles.textArea}>If you are looking for ransom, I can tell you I don't have money</Text>
+					<Text style={styles.textArea}>But what I do have, is a very particular set of characters</Text>
+					<Text style={styles.textArea}>I've been calling you <Text style={{ fontWeight: 'bold' }}>{state.user.uid}</Text></Text>
+					<Text style={[styles.textArea, { marginBottom: 10, marginTop: 20 }]}>
+						You can still use the app, delete your account, tell us more about you, or contact support - wait times should be tiny, but official sign ups will get priority (sorry).
+					</Text>
+				</View>
+
+
+				{/* <Text style={[styles.textArea, {marginBottom: 20}]}>You clicked "Skip for now" when signing up</Text> */}
+
+
+				{/* <TouchableOpacity style={[styles.cancelButton, {marginVertical: 20}]} onPress={handleSignOut}>
+					<Text style={styles.cancelButtonText}>Sign Out{state.user.isAnonymous && ' and Delete'}</Text>
+				</TouchableOpacity> */}
 
 				<View style={[styles.buttonContainer]}>
 					<TouchableOpacity style={styles.textOnly} onPress={() => { console.log("Copy uid") }}>
@@ -102,8 +109,8 @@ const Account = () => {
 					<TouchableOpacity style={styles.button} onPress={() => { }}>
 						<Text style={styles.buttonText}>Create Free Account</Text>
 					</TouchableOpacity>
-					<TouchableOpacity style={styles.deleteButton} onPress={() => { }}>
-						<Text style={styles.buttonText}>Delete Anonymous User</Text>
+					<TouchableOpacity style={[styles.cancelButton]} onPress={handleSignOut}>
+						<Text style={styles.cancelButtonText}>Sign Out{state.user.isAnonymous && ' and Delete'}</Text>
 					</TouchableOpacity>
 				</View>
 			</View>
@@ -175,7 +182,7 @@ const Account = () => {
 				</TouchableOpacity>
 			)}
 			<TouchableOpacity style={styles.cancelButton} onPress={handleSignOut}>
-				<Text style={styles.cancelButtonText}>Sign Out</Text>
+				<Text style={styles.cancelButtonText}>Sign Out{state.user.isAnonymous && ' and Delete'}</Text>
 			</TouchableOpacity>
 		</View>
 	)
@@ -209,7 +216,8 @@ const styles = StyleSheet.create({
 		color: '#ffffff',
 		fontSize: 16,
 		fontWeight: 'bold',
-		textAlign: 'center'
+		textAlign: 'center',
+		flex: 1
 	},
 	itemContainer: {
 		borderBottomWidth: '1px',
@@ -219,15 +227,13 @@ const styles = StyleSheet.create({
 		borderRadius: 8,
 	},
 	buttonContainer: {
-		width: '100%',
-		height: '100%',
 		display: 'flex',
 		flexDirection: 'column',
-		alignContent: 'center',
+		// alignSelf: 'flex-end',
 		textAlign: 'center',
 		justifyContent: 'flex-end',
-		marginTop: 10
-		// opacity: 1
+		// marginTop: 10,
+		flex: 1
 	},
 	container: {
 		flex: 100,

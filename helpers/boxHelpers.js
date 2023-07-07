@@ -38,13 +38,37 @@ const getBoxes = async (uid, callback) => {
 const getBoxesOnce = async (uid) => {
 	try {
 		const q = query(collection(firestore, 'boxes'), where('ownerId', '==', uid))
+		const itemQuery = query(collection(firestore, 'items'), where('ownerId', '==', uid))
 
 		let boxPath = await getDocsFromCache(q)
+		let itemPath = await getDocsFromCache(itemQuery)
 
 		const boxes = []
+		const items = []
+		
+		if(itemPath.length == 0){
+			
+		}
+
+		itemPath.forEach((doc) => {
+			const item = doc.data()
+			items.push(item)
+		})
+
+		if(items.length == 0){
+			itemPath = await getDocs(itemQuery)
+			itemPath.forEach((doc) => {
+				const item = doc.data()
+				items.push(item)
+			})
+		}
 
 		boxPath.forEach((doc) => {
 			const box = doc.data()
+			box.items = items.filter((item) => {
+				return item.boxId == box.id
+			})
+
 			boxes.push(box)
 		})
 
@@ -52,6 +76,9 @@ const getBoxesOnce = async (uid) => {
 			boxPath = await getDocs(q)
 			boxPath.forEach((doc) => {
 				const box = doc.data()
+				box.items = items.filter((item) => {
+					return item.boxId == box.id
+				})
 				boxes.push(box)
 			})
 		}
