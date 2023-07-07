@@ -3,7 +3,7 @@
     "updates": {
       "enabled": false
     },
-    "name": "findable-app",
+    "name": "findable",
     "slug": "findable-app",
     "version": "1.1.0",
     "orientation": "portrait",
