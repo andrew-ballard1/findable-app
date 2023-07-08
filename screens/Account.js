@@ -106,7 +106,7 @@ const Account = () => {
 					<TouchableOpacity style={styles.textOnly} onPress={() => { console.log("Copy uid") }}>
 						<Text>User ID: {state.user.uid}</Text>
 					</TouchableOpacity>
-					<TouchableOpacity style={styles.button} onPress={() => { }}>
+					<TouchableOpacity style={styles.button} onPress={() => {}}>
 						<Text style={styles.buttonText}>Create Free Account</Text>
 					</TouchableOpacity>
 					<TouchableOpacity style={[styles.cancelButton]} onPress={handleSignOut}>
@@ -128,8 +128,7 @@ const Account = () => {
 					placeholder="Enter your name"
 				/>
 			) : (
-				<Text style={styles.field}>{JSON.stringify(user, null, 2)}</Text>
-				// <Text style={styles.field}>{user?.displayName ? user.displayName : 'No Username'}</Text>
+				<Text style={styles.field}>You signed up as {state.user.email}</Text>
 			)}
 
 			{isEditing ? (
@@ -173,7 +172,9 @@ const Account = () => {
 					<Text style={styles.saveButtonText}>Save</Text>
 				</TouchableOpacity>
 			) : (
-				<Button title="Edit" onPress={() => setIsEditing(true)} style={styles.button} />
+				<TouchableOpacity onPress={() => setIsEditing(true)} style={styles.button}>
+					<Text>Edit</Text>
+				</TouchableOpacity>
 			)}
 
 			{isEditing && (
@@ -288,6 +289,7 @@ const styles = StyleSheet.create({
 		color: '#FFFFFF',
 		fontSize: 16,
 		fontWeight: 'bold',
+		textAlign: 'center'
 	},
 	saveButton: {
 		backgroundColor: '#0079FF',
