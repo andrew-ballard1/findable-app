@@ -83,7 +83,7 @@ const Account = () => {
 		return (
 			<View style={{ padding: 20, paddingTop: 0, paddingBottom: 70, display: 'flex', justifyContent: 'space-between', flexDirection: 'column', flex: 1 }}>
 				<SignOutDialog />
-				<View style={{flex: 1}}>
+				<View style={{ flex: 1 }}>
 					<Text style={styles.textArea}>I don't know who you are</Text>
 					<Text style={styles.textArea}>I don't know what you want</Text>
 					<Text style={styles.textArea}>If you are looking for ransom, I can tell you I don't have money</Text>
@@ -103,10 +103,10 @@ const Account = () => {
 				</TouchableOpacity> */}
 
 				<View style={[styles.buttonContainer]}>
-					<TouchableOpacity style={styles.textOnly} onPress={() => { console.log("Copy uid") }}>
-						<Text>User ID: {state.user.uid}</Text>
+					<TouchableOpacity style={[styles.textOnly, { textAlign: 'center' }]} onPress={() => { console.log("Copy uid") }}>
+						<Text style={{ textAlign: 'center' }}>User ID: {state.user.uid}</Text>
 					</TouchableOpacity>
-					<TouchableOpacity style={styles.button} onPress={() => {}}>
+					<TouchableOpacity style={styles.button} onPress={() => { }}>
 						<Text style={styles.buttonText}>Create Free Account</Text>
 					</TouchableOpacity>
 					<TouchableOpacity style={[styles.cancelButton]} onPress={handleSignOut}>
@@ -119,7 +119,8 @@ const Account = () => {
 
 	return (
 		<View style={styles.container}>
-			{/* look into adding a check for anonymous user here. We can show text fields to anonymous users to suggest signing up properly */}
+			<SignOutDialog />
+
 			{isEditing ? (
 				<TextInput
 					style={styles.input}
@@ -183,7 +184,7 @@ const Account = () => {
 				</TouchableOpacity>
 			)}
 			<TouchableOpacity style={styles.cancelButton} onPress={handleSignOut}>
-				<Text style={styles.cancelButtonText}>Sign Out{state.user.isAnonymous && ' and Delete'}</Text>
+				<Text style={styles.cancelButtonText}>Sign Out</Text>
 			</TouchableOpacity>
 		</View>
 	)

@@ -1,5 +1,10 @@
-import React, { useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Animated, Easing } from 'react-native'
+
+import firebase from '../firebase'
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
+
+const auth = getAuth(firebase)
 
 const SignUpForm = ({ onSkip }) => {
 	const [firstName, setFirstName] = useState('')
@@ -8,27 +13,36 @@ const SignUpForm = ({ onSkip }) => {
 	const [password, setPassword] = useState('')
 	const [confirmPassword, setConfirmPassword] = useState('')
 	const [errors, setErrors] = useState({})
+	const [hasAccount, setHasAccount] = useState(false)
+
+	const scaleY = new Animated.Value(hasAccount ? 1 : 0)
+	const translateY = scaleY.interpolate({
+		inputRange: [0, 1],
+		outputRange: [-40, 0],
+	})
+
+	useEffect(() => {
+		Animated.spring(scaleY, {
+			toValue: hasAccount ? 0 : 1,
+			useNativeDriver: true,
+		}).start()
+	}, [hasAccount])
 
 	const handleSignUp = () => {
-		// Perform sign-up logic here
+
+		console.log('sign up')
 		const newErrors = {}
 
-		if (!firstName) {
-			newErrors.firstName = 'First name is required'
-		}
-		if (!lastName) {
-			newErrors.lastName = 'Last name is required'
-		}
 		if (!email) {
 			newErrors.email = 'Email is required'
 		}
 		if (!password) {
 			newErrors.password = 'Password is required'
 		}
-		if (!confirmPassword) {
+		if (!hasAccount && !confirmPassword) {
 			newErrors.confirmPassword = 'Confirm password is required'
 		}
-		if (password !== confirmPassword) {
+		if (!hasAccount && password !== confirmPassword) {
 			newErrors.confirmPassword = 'Passwords do not match'
 		}
 		if (password.length < 8 || !/\d/.test(password) || !/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/\W/.test(password)) {
@@ -40,82 +54,93 @@ const SignUpForm = ({ onSkip }) => {
 			return
 		}
 
-		auth.createUserWithEmailAndPassword(email, password)
+		if(hasAccount){
+			signInWithEmailAndPassword(auth, email, password).then(() => {
+				console.log('might need to dispatch state update here')
+			})
+		} else {
+			createUserWithEmailAndPassword(auth, email, password)
 			.then((userCredential) => {
 				// Sign-up successful
+				console.log(userCredential)
 				const user = userCredential.user
+				console.log(user)
+				// await dispatch({...state, user: { uid: user.uid, firs}})
 				// Proceed with any additional logic or navigation
 			})
 			.catch((error) => {
 				// Handle specific error cases
+				console.log(error)
 				if (error.code === 'auth/email-already-in-use') {
 					newErrors.email = 'Email is already in use'
 				}
 
 				setErrors(newErrors)
 			})
-
-		// Proceed with sign-up logic
-		// ...
+		}
 	}
 
 	return (
-		<View style={styles.container}>
-			{/* <Text style={styles.heading}>Sign Up</Text> */}
-			<TextInput
-				style={[styles.input, errors.firstName && styles.inputError]}
-				placeholder="First Name"
-				value={firstName}
-				onChangeText={setFirstName}
-				placeholderTextColor={'#dddddd'}
-			/>
-			{errors.firstName && <Text style={styles.errorText}>{errors.firstName}</Text>}
-			<TextInput
-				style={[styles.input, errors.lastName && styles.inputError]}
-				placeholder="Last Name"
-				value={lastName}
-				onChangeText={setLastName}
-				placeholderTextColor={'#dddddd'}
-			/>
-			{errors.lastName && <Text style={styles.errorText}>{errors.lastName}</Text>}
-			<TextInput
-				style={[styles.input, errors.email && styles.inputError]}
-				placeholder="Email"
-				value={email}
-				onChangeText={setEmail}
-				keyboardType="email-address"
-				placeholderTextColor={'#dddddd'}
-			/>
-			{errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
-			<TextInput
-				style={[styles.input, errors.password && styles.inputError]}
-				placeholder="Password"
-				value={password}
-				onChangeText={setPassword}
-				secureTextEntry
-				placeholderTextColor={'#dddddd'}
-			/>
-			{errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
-			<TextInput
-				style={[styles.input, errors.confirmPassword && styles.inputError]}
-				placeholder="Confirm Password"
-				value={confirmPassword}
-				onChangeText={setConfirmPassword}
-				placeholderTextColor={'#dddddd'}
-				secureTextEntry
-			/>
-			{errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
+		<KeyboardAvoidingView
+			style={{ flex: 1 }}
+			behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
+			keyboardVerticalOffset={140}
+		>
 
-			<View style={{ marginTop: 100, display: 'flex', flexDirection: 'column', alignItems: 'center', paddingVertical: 10 }}>
-				<TouchableOpacity style={styles.button} onPress={handleSignUp}>
-					<Text style={styles.buttonText}>Sign Up</Text>
-				</TouchableOpacity>
-				{/* <Text style={{ fontSize: 12, marginTop: 10, color: 'white' }}>(it's free)</Text> */}
-				<TouchableOpacity style={[styles.skipButton, { marginTop: 30 }]} onPress={onSkip}>
-					<Text style={styles.skipButtonText}>Nevermind</Text>
-				</TouchableOpacity>
-			</View>
-			{/* <View style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+			<View style={styles.container}>
+				<TextInput
+					style={[styles.input, errors.email && styles.inputError]}
+					placeholder="Email"
+					value={email}
+					onChangeText={setEmail}
+					keyboardType="email-address"
+					placeholderTextColor={'#dddddd'}
+				/>
+				{errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+				<TextInput
+					style={[styles.input, errors.password && styles.inputError]}
+					placeholder="Password"
+					value={password}
+					onChangeText={setPassword}
+					secureTextEntry
+					placeholderTextColor={'#dddddd'}
+				/>
+				{errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+				<Animated.View
+					style={
+						{
+							width: '100%',
+							opacity: scaleY,
+							transform: [{ scaleY }],
+						}
+					}
+				>
+					<TextInput
+						style={[styles.input, errors.confirmPassword ? styles.inputError : null]}
+						placeholder="Confirm Password"
+						value={confirmPassword}
+						onChangeText={setConfirmPassword}
+						placeholderTextColor={'#dddddd'}
+						secureTextEntry
+					/>
+					{!hasAccount && errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
+				</Animated.View>
+				<Animated.View style={{ flex: 1, color: 'white', display: 'flex', flexDirection: 'row', transform: [{ translateY }] }}>
+					<Text style={{ color: 'white', marginRight: 10 }}>{hasAccount ? "Don't" : 'Already'} have an account?</Text>
+					<Text style={{ color: 'white', fontWeight: 600 }} onPress={() => {
+						setHasAccount(!hasAccount)
+					}}>{hasAccount ? 'Sign Up' : 'Sign In'}</Text>
+				</Animated.View>
+				<View style={{ marginTop: 100, display: 'flex', flexDirection: 'column', alignItems: 'center', paddingVertical: 10 }}>
+					<TouchableOpacity style={styles.button} onPress={handleSignUp}>
+						<Text style={styles.buttonText}>{hasAccount ? 'Sign In' : 'Sign Up'}</Text>
+					</TouchableOpacity>
+					{/* <Text style={{ fontSize: 12, marginTop: 10, color: 'white' }}>(it's free)</Text> */}
+					<TouchableOpacity style={[styles.skipButton, { marginTop: 30 }]} onPress={onSkip}>
+						<Text style={styles.skipButtonText}>Nevermind</Text>
+					</TouchableOpacity>
+				</View>
+				{/* <View style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
 				<TouchableOpacity style={[styles.button]} onPress={handleSignUp}>
 					<Text style={[styles.buttonText]}>Sign Up</Text>
 				</TouchableOpacity>
@@ -124,7 +149,8 @@ const SignUpForm = ({ onSkip }) => {
 				</TouchableOpacity>
 			</View> */}
 
-		</View>
+			</View>
+		</KeyboardAvoidingView>
 	)
 }
 const styles = StyleSheet.create({
@@ -147,6 +173,11 @@ const styles = StyleSheet.create({
 		fontSize: 24,
 		fontWeight: 'bold',
 		marginBottom: 20,
+	},
+	errorText: {
+		color: '#f88',
+		paddingLeft: 10,
+		marginBottom: 10
 	},
 	input: {
 		width: '100%',

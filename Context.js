@@ -52,7 +52,8 @@ const GlobalStateProvider = ({ children }) => {
 					await AsyncStorage.setItem('user', JSON.stringify({
 						uid: user.uid,
 						isAnonymous: user.isAnonymous ? true : false,
-						id_token: idToken
+						id_token: idToken,
+						email: user.isAnonymous ? null : user.email
 					}))
 
 					await dispatch({
@@ -102,7 +103,8 @@ const GlobalStateProvider = ({ children }) => {
 							user: {
 								uid: user.uid,
 								isAnonymous: user.isAnonymous ? true : false,
-								id_token: idToken ? idToken : null
+								id_token: idToken ? idToken : null,
+								email: user.isAnonymous ? '' : user.email
 							}
 						})
 					} catch (err) {
