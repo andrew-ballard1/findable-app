@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Animated, Easing } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Animated, Easing, Dimensions } from 'react-native'
 
 import firebase from '../firebase'
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
@@ -86,7 +86,6 @@ const SignUpForm = ({ onSkip }) => {
 			behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
 			keyboardVerticalOffset={140}
 		>
-
 			<View style={styles.container}>
 				<TextInput
 					style={[styles.input, errors.email && styles.inputError]}
@@ -140,15 +139,6 @@ const SignUpForm = ({ onSkip }) => {
 						<Text style={styles.skipButtonText}>Nevermind</Text>
 					</TouchableOpacity>
 				</View>
-				{/* <View style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-				<TouchableOpacity style={[styles.button]} onPress={handleSignUp}>
-					<Text style={[styles.buttonText]}>Sign Up</Text>
-				</TouchableOpacity>
-				<TouchableOpacity style={[styles.skipButton, { marginTop: 30 }]} onPress={onSkip}>
-					<Text style={[styles.skipButtonText]}>Nevermind</Text>
-				</TouchableOpacity>
-			</View> */}
-
 			</View>
 		</KeyboardAvoidingView>
 	)
@@ -161,7 +151,9 @@ const styles = StyleSheet.create({
 		alignContent: 'center',
 		alignItems: 'center',
 		display: 'flex',
-		flexDirection: 'column'
+		flexDirection: 'column',
+		height: 300,
+		marginTop: Dimensions.get('screen').height / 3
 	},
 	heading: {
 		fontSize: 24,

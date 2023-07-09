@@ -11,7 +11,7 @@ import Modal from 'react-native-modal'
 
 const auth = getAuth(firebase)
 
-const SignOutDialog = () => {
+const SignOutDialog = ({isDeleting = false}) => {
 	const [state, dispatch] = useGlobalState()
 
 	const cancel = async () => {
@@ -37,10 +37,10 @@ const SignOutDialog = () => {
 				<View style={styles.dialogContainer}>
 					<View style={styles.dialogContent}>
 						<Text style={styles.dialogText}>
-							{state.user.isAnonymous ? "Are you sure?" : 'Sign Out'}
+							{(!state.user.isAnonymous && !isDeleting) ? 'Sign Out' : 'Are you sure?'}
 						</Text>
 						<View style={{ display: 'flex', flexDirection: 'column', textAlign: 'center', flex: 1, width: '100%', padding: 10, marginBottom: 20 }} >
-							{state.user.isAnonymous && <Text>You cannot undo this. Any information you have stored here will be <Text style={{fontWeight: "bold"}}>permanently</Text> deleted.</Text>}
+							{(isDeleting || state.user.isAnonymous) && <Text>You cannot undo this. Any information you have stored here will be <Text style={{fontWeight: "bold"}}>permanently</Text> deleted.</Text>}
 						</View>
 
 						<View style={[styles.addBoxButtonContainer]}>
@@ -48,7 +48,7 @@ const SignOutDialog = () => {
 								style={[styles.dialogButton, styles.redButton]}
 								onPress={handleSignOut}
 							>
-								<Text numberOfLines={1} style={styles.buttonText}>Sign Out{state.user.isAnonymous && ' and Delete'}</Text>
+								<Text numberOfLines={1} style={styles.buttonText}>{isDeleting ? 'Delete' : `Sign Out${state.user.isAnonymous ? ' and Delete' : ''}`}</Text>
 							</TouchableOpacity>
 							<TouchableOpacity
 								style={[styles.dialogButton, styles.greyButton]}
