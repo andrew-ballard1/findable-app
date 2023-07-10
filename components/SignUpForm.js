@@ -16,9 +16,10 @@ const SignUpForm = ({ onSkip }) => {
 	const [confirmPassword, setConfirmPassword] = useState('')
 	const [signUpLoading, setSignUpLoading] = useState(false)
 	const [errors, setErrors] = useState({})
-	// const [hasAccount, setHasAccount] = useState(state.forms.signUp.hasAccount)
+	const [hasAccount, setHasAccount] = useState(state.forms.signUp.hasAccount)
+	const [showErrors, setShowErrors] = useState(true)
 
-	const hasAccount = state.forms.signUp.hasAccount
+	// const hasAccount = state.forms.signUp.hasAccount
 
 	const scaleY = useRef(new Animated.Value(hasAccount ? 0 : 1)).current
 	const translateY = scaleY.interpolate({
@@ -31,11 +32,21 @@ const SignUpForm = ({ onSkip }) => {
 			toValue: hasAccount ? 0 : 1,
 			useNativeDriver: true,
 		}).start()
+		// if(errors.length > 0){
+			// if(hasAccount){
+				setShowErrors(false)
+			// } else {
+				// setShowErrors(true)
+			// }
+		// } else {
+		// 	setShowErrors(true)
+		// }
 	}, [hasAccount])
 
 	const toggleHasAccount = async () => {
 		console.log(state.forms.signUp.hasAccount)
-		await dispatch({...state, forms: {...state.forms, signUp: {hasAccount: !state.forms.signUp.hasAccount}}})
+		setHasAccount(!hasAccount)
+		// await dispatch({...state, forms: {...state.forms, signUp: {hasAccount: !state.forms.signUp.hasAccount}}})
 	}
 
 	const handleSignUp = () => {
@@ -61,6 +72,7 @@ const SignUpForm = ({ onSkip }) => {
 
 		if (Object.keys(newErrors).length > 0) {
 			setErrors(newErrors)
+			setShowErrors(true)
 			setSignUpLoading(false)
 			return
 		}
@@ -76,7 +88,6 @@ const SignUpForm = ({ onSkip }) => {
 					console.log(userCredential)
 					const user = userCredential.user
 					console.log(user)
-					// await dispatch({...state, user: { uid: user.uid, firs}})
 					// Proceed with any additional logic or navigation
 				})
 				.catch((error) => {
@@ -103,16 +114,16 @@ const SignUpForm = ({ onSkip }) => {
 					keyboardType="email-address"
 					placeholderTextColor={'#dddddd'}
 				/>
-				{errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+				{showErrors && errors.email && <View><Text style={styles.errorText}>{errors.email}</Text></View>}
 				<TextInput
-					style={[styles.input, errors.password && styles.inputError]}
+					style={[styles.input, errors.password ? styles.inputError : null]}
 					placeholder="Password"
 					value={password}
 					onChangeText={setPassword}
 					secureTextEntry
 					placeholderTextColor={'#dddddd'}
 				/>
-				{errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
+				{showErrors && errors.password && <View><Text style={styles.errorText}>{errors.password}</Text></View>}
 				<Animated.View
 					style={
 						{
@@ -130,7 +141,7 @@ const SignUpForm = ({ onSkip }) => {
 						placeholderTextColor={'#dddddd'}
 						secureTextEntry
 					/>
-					{!hasAccount && errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
+					{showErrors && !hasAccount && errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
 				</Animated.View>
 				<Animated.View style={{ flex: 1, color: 'white', display: 'flex', flexDirection: 'row', transform: [{ translateY }] }}>
 					<Text style={{ color: 'white', marginRight: 10 }}>{hasAccount ? "Don't" : 'Already'} have an account?</Text>
@@ -140,7 +151,6 @@ const SignUpForm = ({ onSkip }) => {
 					<TouchableOpacity style={styles.button} onPress={handleSignUp}>
 						{signUpLoading ? <Loading size={60} color={'#ffffff'} /> : <Text style={styles.buttonText}>{hasAccount ? 'Sign In' : 'Sign Up'}</Text>}
 					</TouchableOpacity>
-					{/* <Text style={{ fontSize: 12, marginTop: 10, color: 'white' }}>(it's free)</Text> */}
 					<TouchableOpacity style={[styles.skipButton, { marginTop: 30 }]} onPress={onSkip}>
 						<Text style={styles.skipButtonText}>Nevermind</Text>
 					</TouchableOpacity>
