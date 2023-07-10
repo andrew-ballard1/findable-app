@@ -132,8 +132,8 @@ const BoxList = ({ route }) => {
 	return (
 		<View key="boxViewComponent" style={styles.container}>
 			<View style={styles.header}>
-				<Text style={styles.title}>Your Stuff</Text>
-				<View style={styles.viewModeButtons}>
+				<Text style={[styles.title, {width: '50%'}]}>Your Stuff</Text>
+				<View style={[styles.viewModeButtons, {width: '50%'}]}>
 					<TouchableOpacity
 						style={[styles.dialogButton, viewMode == 'grid' ? styles.blueButton : styles.greyButton]}
 						onPress={() => setViewMode('grid')}
