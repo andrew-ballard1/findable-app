@@ -97,6 +97,9 @@ const SignUpForm = ({ onSkip }) => {
 						newErrors.email = 'Email is already in use'
 					}
 
+					if(error.code === 'auth/user-not-found' || 'auth/wrong-password'){
+						newErrors.email = 'Incorrect email or password'
+					}
 					setErrors(newErrors)
 				})
 		}
