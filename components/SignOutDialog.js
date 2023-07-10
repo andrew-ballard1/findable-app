@@ -1,9 +1,9 @@
-import React from 'react'
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { View, Text, TouchableOpacity, StyleSheet, TextInput } from 'react-native'
 
 import colors from '../colors'
 import { useGlobalState } from '../Context'
-import { getAuth, signOut } from 'firebase/auth'
+import { getAuth, signOut, deleteUser, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth'
 import firebase from '../firebase'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import Modal from 'react-native-modal'
@@ -11,17 +11,47 @@ import Modal from 'react-native-modal'
 
 const auth = getAuth(firebase)
 
-const SignOutDialog = ({isDeleting = false}) => {
+const SignOutDialog = ({ isDeleting = false }) => {
 	const [state, dispatch] = useGlobalState()
-
+	const [pass, setPass] = useState('')
+	const [disabled, setDisabled] = useState(false)
+	
 	const cancel = async () => {
-		await dispatch({...state, modal:{...state.modal, signOut: false}})
+		setPass('')
+		await dispatch({ ...state, modal: { ...state.modal, signOut: false } })
 	}
+	useEffect(() => {
+		// console.log(pass)
+		if(pass.length == 0){
+			setDisabled(true)
+		} else {
+			setDisabled(false)
+		}
+	}, [pass])
 
 	const handleSignOut = async () => {
-		await signOut(auth)
-		await dispatch({...state, user: false})
-		await AsyncStorage.removeItem('user')
+		if (isDeleting) {
+			if (pass.length > 0) {
+
+				const credential = EmailAuthProvider.credential(
+					auth.currentUser.email,
+					pass
+				)
+
+				const result = await reauthenticateWithCredential(
+					auth.currentUser,
+					credential
+				)
+
+				console.log('need to figure out the whole delete user thing here')
+
+				await AsyncStorage.removeItem('user')
+				await deleteUser(result.user)
+			}
+		} else {
+			await signOut(auth)
+		}
+		await dispatch({ ...state, user: false })
 	}
 
 
@@ -34,19 +64,31 @@ const SignOutDialog = ({isDeleting = false}) => {
 			avoidKeyboard={true}
 		>
 			<View style={[styles.container]}>
-				<View style={styles.dialogContainer}>
+				<View style={[styles.dialogContainer]}>
 					<View style={styles.dialogContent}>
 						<Text style={styles.dialogText}>
-							{(!state.user.isAnonymous && !isDeleting) ? 'Sign Out' : 'Are you sure?'}
+							{(state.user.isAnonymous || isDeleting) ? "Are you sure?" : 'Sign Out'}
 						</Text>
-						<View style={{ display: 'flex', flexDirection: 'column', textAlign: 'center', flex: 1, width: '100%', padding: 10, marginBottom: 20 }} >
-							{(isDeleting || state.user.isAnonymous) && <Text>You cannot undo this. Any information you have stored here will be <Text style={{fontWeight: "bold"}}>permanently</Text> deleted.</Text>}
+						<View style={{ textAlign: 'center', width: '100%', padding: 10, marginBottom: 20 }} >
+							{(isDeleting || state.user.isAnonymous) && <Text>You cannot undo this. Any information you have stored here will be <Text style={{ fontWeight: "bold" }}>permanently</Text> deleted.</Text>}
+							{!isDeleting && !state.user.isAnonymous && <Text>We'll keep the light on!</Text>}
 						</View>
 
 						<View style={[styles.addBoxButtonContainer]}>
+							{isDeleting && <TextInput
+								style={styles.dialogInput}
+								placeholder="Password"
+								secureTextEntry={true}
+								placeholderTextColor="#999999"
+								value={pass}
+								onChangeText={text => setPass(text)}
+								scrollEnabled={true}
+								autoCapitalize='none'
+							/>}
 							<TouchableOpacity
-								style={[styles.dialogButton, styles.redButton]}
+								style={disabled && isDeleting ? [styles.dialogButton, styles.greyButton] : [styles.dialogButton, styles.redButton]}
 								onPress={handleSignOut}
+								disabled={disabled && isDeleting}
 							>
 								<Text numberOfLines={1} style={styles.buttonText}>{isDeleting ? 'Delete' : `Sign Out${state.user.isAnonymous ? ' and Delete' : ''}`}</Text>
 							</TouchableOpacity>
@@ -78,6 +120,19 @@ const styles = StyleSheet.create({
 		padding: 10,
 		borderRadius: 5,
 	},
+	dialogInput: {
+		minHeight: 40,
+		borderColor: '#dddddd',
+		borderWidth: 1,
+		display: 'flex',
+		justifyContent: 'center',
+		borderRadius: 8,
+		paddingLeft: 5,
+		marginBottom: 10,
+		flex: 0,
+		width: '100%',
+		color: '#333333'
+	},
 	buttonText: {
 		color: 'white',
 		fontSize: 16,
@@ -86,16 +141,17 @@ const styles = StyleSheet.create({
 		minWidth: 80
 	},
 	dialogContainer: {
-		height: 250,
+		// flex: 0,
 		backgroundColor: 'white',
 		borderRadius: 10,
 		width: '100%',
 	},
 	dialogContent: {
 		display: 'flex',
-		flex: 1,
+		height: '100%',
 		justifyContent: 'space-between',
 		alignItems: 'center',
+		paddingHorizontal: 10
 	},
 	dialogText: {
 		fontSize: 22,
@@ -111,32 +167,20 @@ const styles = StyleSheet.create({
 	buttonContainer: {
 		flexDirection: 'column',
 		justifyContent: 'center',
-		// height: 80,
 		width: '100%'
 	},
 	dialogButton: {
 		width: '100%',
 		padding: 10,
 		borderRadius: 5,
+		marginBottom: 10,
 	},
 	addBoxButtonContainer: {
-		display: 'flex',
 		flex: 1,
 		width: '100%',
-		padding: 10,
-		flexDirection: 'column',
-		justifyContent: 'center',
-		alignItems: 'flex-end',
-		marginBottom: 20
 	},
 	redButton: {
 		backgroundColor: '#FF3B30',
-		paddingVertical: 12,
-		paddingHorizontal: 24,
-		borderRadius: 8,
-		marginBottom: 16,
-
-		// backgroundColor: colors.error.hex,
 		color: colors.error.fontColor
 	},
 	blueButton: {
