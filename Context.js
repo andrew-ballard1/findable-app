@@ -24,6 +24,11 @@ const globalState = {
 		deleteBox: false,
 		addItem: false,
 		deleteItem: false
+	},
+	forms: {
+		signUp: {
+			hasAccount: false
+		}
 	}
 }
 
