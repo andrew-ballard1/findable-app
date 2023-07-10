@@ -81,8 +81,14 @@ const Account = () => {
 
 	if (state.user.isAnonymous) {
 		return (
-			<View style={{ padding: 20, paddingTop: 0, paddingBottom: 70, display: 'flex', justifyContent: 'space-between', flexDirection: 'column', flex: 1 }}>
+			<View style={{ paddingTop: 0, paddingBottom: 70, display: 'flex', justifyContent: 'space-between', flexDirection: 'column', flex: 1 }}>
 				<SignOutDialog />
+				<TouchableOpacity onPress={() => {
+					dispatch({ ...state, user: { ...state.user, isAnonymous: !state.user.isAnonymous } })
+				}}>
+					<Text>SWITCH USER</Text>
+				</TouchableOpacity>
+
 				<View style={{ flex: 1 }}>
 					<Text style={styles.textArea}>I don't know who you are</Text>
 					<Text style={styles.textArea}>I don't know what you want</Text>
@@ -119,32 +125,16 @@ const Account = () => {
 
 	return (
 		<View style={styles.container}>
-			<SignOutDialog />
+			<SignOutDialog isDeleting={true}/>
 
-			{isEditing ? (
-				<TextInput
-					style={styles.input}
-					value={displayName}
-					onChangeText={setDisplayName}
-					placeholder="Enter your name"
-				/>
-			) : (
-				<Text style={styles.field}>You signed up as {state.user.email}</Text>
-			)}
 
-			{isEditing ? (
-				<TextInput
-					style={styles.input}
-					value={email}
-					onChangeText={setEmail}
-					placeholder="Enter your email"
-					autoCapitalize="none"
-				/>
-			) : (
-				<Text style={styles.field}>{user?.email}</Text>
-			)}
+			<View style={{ flex: 1 }}>
+				<Text style={styles.textArea}>You signed up as {state.user.email}</Text>
+				<Text style={[styles.textArea, { marginBottom: 10, marginTop: 20 }]}>
+					You can delete your account, or contact support - wait times should be tiny. Official sign ups (with emails, like yours) will get priority.
+				</Text>
+			</View>
 
-			{/* <hr style={styles.divider} /> */}
 
 			{isEditing && (
 				<>
@@ -168,24 +158,27 @@ const Account = () => {
 				</>
 			)}
 
-			{isEditing ? (
-				<TouchableOpacity style={styles.saveButton} onPress={saveChanges}>
-					<Text style={styles.saveButtonText}>Save</Text>
-				</TouchableOpacity>
-			) : (
-				<TouchableOpacity onPress={() => setIsEditing(true)} style={styles.button}>
-					<Text>Edit</Text>
-				</TouchableOpacity>
-			)}
-
-			{isEditing && (
+			{/* {isEditing && (
 				<TouchableOpacity style={styles.cancelButton} onPress={() => setIsEditing(false)}>
 					<Text style={styles.cancelButtonText}>Cancel</Text>
 				</TouchableOpacity>
-			)}
-			<TouchableOpacity style={styles.cancelButton} onPress={handleSignOut}>
-				<Text style={styles.cancelButtonText}>Sign Out</Text>
+			)} */}
+			<TouchableOpacity onPress={() => {
+				dispatch({ ...state, user: { ...state.user, isAnonymous: !state.user.isAnonymous } })
+			}}>
+				<Text>SWITCH USER</Text>
 			</TouchableOpacity>
+			<View style={[styles.buttonContainer]}>
+				<TouchableOpacity style={[styles.textOnly, { textAlign: 'center' }]} onPress={() => { console.log("Copy uid") }}>
+					<Text style={{ textAlign: 'center' }}>User ID: {state.user.uid}</Text>
+				</TouchableOpacity>
+				<TouchableOpacity style={[styles.cancelButton]} onPress={() => handleSignOut()}>
+					<Text style={styles.cancelButtonText}>Delete User</Text>
+				</TouchableOpacity>
+				<TouchableOpacity style={[styles.cancelButton]} onPress={handleSignOut}>
+					<Text style={styles.cancelButtonText}>Sign Out</Text>
+				</TouchableOpacity>
+			</View>
 		</View>
 	)
 }
@@ -235,18 +228,18 @@ const styles = StyleSheet.create({
 		textAlign: 'center',
 		justifyContent: 'flex-end',
 		// marginTop: 10,
+		width: '100%',
+		paddingHorizontal: 20,
 		flex: 1
 	},
 	container: {
-		flex: 100,
+		flex: 1,
 		display: 'flex',
 		flexDirection: 'column',
 		alignItems: 'center',
-		justifyContent: 'flex-start',
-		paddingHorizontal: 20,
+		justifyContent: 'space-between',
 		marginTop: 50,
-		// paddingVertical: 50,
-		paddingBottom: 200
+		paddingBottom: 60
 	},
 	title: {
 		fontSize: 18,
