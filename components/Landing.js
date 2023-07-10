@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, Animated, Easing, Alert } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, Animated, Easing, Alert, Dimensions, KeyboardAvoidingView, Platform } from 'react-native'
 import firebase from '../firebase'
 import { getAuth, signInAnonymously } from 'firebase/auth'
 import SignUpForm from './SignUpForm'
@@ -57,7 +57,7 @@ const Landing = () => {
 				useNativeDriver: false,
 			}).start()
 		} else {
-			if(backgroundPosition < 0){
+			if (backgroundPosition < 0) {
 				Animated.timing(backgroundPosition, {
 					toValue: -170,
 					duration: 300,
@@ -110,8 +110,8 @@ const Landing = () => {
 					isAnonymous: user.user.isAnonymous,
 					id_token: idToken
 				}))
-	
-	
+
+
 				await dispatch({
 					...state,
 					user: {
@@ -134,30 +134,33 @@ const Landing = () => {
 	}
 
 	return (
-		<>
-			<View style={styles.container}>
-				<Animated.Image style={{ flex: 1, resizeMode: 'contain', width: '100%', height: '100%', padding: 0, margin: 0, left: 0, top: 0, position: 'absolute', transform: [{ translateY: backgroundPosition }] }} source={splash} />
-				{showSignUpForm ? (
-					<Animated.View style={{ width: '90%', marginTop: 70, opacity: stepTwoOpacity}}>
+		<View style={styles.container}>
+			{showSignUpForm ? (
+				<Animated.View style={{ width: '100%', display: 'flex', flex: 1, alignSelf: 'center', justifyContent: 'center', opacity: stepTwoOpacity }}>
+					<KeyboardAvoidingView
+						style={{ flex: 1 }}
+						behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
+						keyboardVerticalOffset={-50}
+					>
+						<Animated.Image style={{ flex: 1, resizeMode: 'contain', width: '100%', height: '100%', padding: 0, margin: 0, left: 0, top: 0, position: 'absolute', transform: [{ translateY: backgroundPosition }] }} source={splash} />
 						<SignUpForm onSkip={handleSkip} />
+					</KeyboardAvoidingView>
+				</Animated.View>
+			) : (
+				<>
+					<Animated.Image style={{ flex: 1, resizeMode: 'contain', width: '100%', height: '100%', padding: 0, margin: 0, left: 0, top: 0, position: 'absolute', transform: [{ translateY: backgroundPosition }] }} source={splash} />
+					<Animated.View style={{ flex: 1, height: Dimensions.get('screen').height, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', opacity: stepOneOpacity, paddingBottom: 70 }}>
+						<TouchableOpacity style={styles.button} onPress={toggleSignUpForm}>
+							<Text style={styles.buttonText}>Sign Up</Text>
+						</TouchableOpacity>
+						<Text style={{ fontSize: 12, marginTop: 10, color: 'white' }}>(it's free)</Text>
+						<TouchableOpacity style={[styles.skipButton, { marginTop: 30 }]} onPress={handleSkip}>
+							<Text style={styles.skipButtonText}>Skip for Now</Text>
+						</TouchableOpacity>
 					</Animated.View>
-				) : (
-					<>
-						{/* Render other components for the landing page */}
-						<Text style={styles.largeTitle}></Text>
-						<Animated.View style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: stepOneOpacity }}>
-							<TouchableOpacity style={styles.button} onPress={toggleSignUpForm}>
-								<Text style={styles.buttonText}>Sign Up</Text>
-							</TouchableOpacity>
-							<Text style={{ fontSize: 12, marginTop: 10, color: 'white' }}>(it's free)</Text>
-							<TouchableOpacity style={[styles.skipButton, { marginTop: 30 }]} onPress={handleSkip}>
-								<Text style={styles.skipButtonText}>Skip for Now</Text>
-							</TouchableOpacity>
-						</Animated.View>
-					</>
-				)}
-			</View>
-		</>
+				</>
+			)}
+		</View >
 	)
 }
 
@@ -166,6 +169,8 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: 'space-around',
 		alignItems: 'center',
+		display: 'flex',
+		flexDirection: 'column',
 		// paddingHorizontal: 20,
 		backgroundColor: '#3F72AF'
 	},
