@@ -1,21 +1,26 @@
-import React, { useEffect, useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Animated, Easing, Dimensions } from 'react-native'
-
+import React, { useEffect, useState, useRef } from 'react'
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, TouchableWithoutFeedback, Keyboard, Animated, Dimensions } from 'react-native'
+import Loading from './Loading'
 import firebase from '../firebase'
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
+import { useGlobalState } from '../Context'
 
 const auth = getAuth(firebase)
 
 const SignUpForm = ({ onSkip }) => {
+	const [state, dispatch] = useGlobalState()
 	const [firstName, setFirstName] = useState('')
 	const [lastName, setLastName] = useState('')
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
 	const [confirmPassword, setConfirmPassword] = useState('')
+	const [signUpLoading, setSignUpLoading] = useState(false)
 	const [errors, setErrors] = useState({})
-	const [hasAccount, setHasAccount] = useState(false)
+	// const [hasAccount, setHasAccount] = useState(state.forms.signUp.hasAccount)
 
-	const scaleY = new Animated.Value(hasAccount ? 1 : 0)
+	const hasAccount = state.forms.signUp.hasAccount
+
+	const scaleY = useRef(new Animated.Value(hasAccount ? 0 : 1)).current
 	const translateY = scaleY.interpolate({
 		inputRange: [0, 1],
 		outputRange: [-40, 0],
@@ -28,8 +33,13 @@ const SignUpForm = ({ onSkip }) => {
 		}).start()
 	}, [hasAccount])
 
-	const handleSignUp = () => {
+	const toggleHasAccount = async () => {
+		console.log(state.forms.signUp.hasAccount)
+		await dispatch({...state, forms: {...state.forms, signUp: {hasAccount: !state.forms.signUp.hasAccount}}})
+	}
 
+	const handleSignUp = () => {
+		setSignUpLoading(true)
 		console.log('sign up')
 		const newErrors = {}
 
@@ -51,41 +61,39 @@ const SignUpForm = ({ onSkip }) => {
 
 		if (Object.keys(newErrors).length > 0) {
 			setErrors(newErrors)
+			setSignUpLoading(false)
 			return
 		}
 
-		if(hasAccount){
+		if (hasAccount) {
 			signInWithEmailAndPassword(auth, email, password).then(() => {
 				console.log('might need to dispatch state update here')
 			})
 		} else {
 			createUserWithEmailAndPassword(auth, email, password)
-			.then((userCredential) => {
-				// Sign-up successful
-				console.log(userCredential)
-				const user = userCredential.user
-				console.log(user)
-				// await dispatch({...state, user: { uid: user.uid, firs}})
-				// Proceed with any additional logic or navigation
-			})
-			.catch((error) => {
-				// Handle specific error cases
-				console.log(error)
-				if (error.code === 'auth/email-already-in-use') {
-					newErrors.email = 'Email is already in use'
-				}
+				.then((userCredential) => {
+					// Sign-up successful
+					console.log(userCredential)
+					const user = userCredential.user
+					console.log(user)
+					// await dispatch({...state, user: { uid: user.uid, firs}})
+					// Proceed with any additional logic or navigation
+				})
+				.catch((error) => {
+					// Handle specific error cases
+					console.log(error)
+					if (error.code === 'auth/email-already-in-use') {
+						newErrors.email = 'Email is already in use'
+					}
 
-				setErrors(newErrors)
-			})
+					setErrors(newErrors)
+				})
 		}
+		setSignUpLoading(false)
 	}
 
 	return (
-		<KeyboardAvoidingView
-			style={{ flex: 1 }}
-			behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
-			keyboardVerticalOffset={140}
-		>
+		<TouchableWithoutFeedback style={{backgroundColor: 'rgba(255, 0, 0, 0.2)', borderWidth: 1, borderColor: 'red'}} onPress={Keyboard.dismiss} accessible={false}>
 			<View style={styles.container}>
 				<TextInput
 					style={[styles.input, errors.email && styles.inputError]}
@@ -126,21 +134,19 @@ const SignUpForm = ({ onSkip }) => {
 				</Animated.View>
 				<Animated.View style={{ flex: 1, color: 'white', display: 'flex', flexDirection: 'row', transform: [{ translateY }] }}>
 					<Text style={{ color: 'white', marginRight: 10 }}>{hasAccount ? "Don't" : 'Already'} have an account?</Text>
-					<Text style={{ color: 'white', fontWeight: 600 }} onPress={() => {
-						setHasAccount(!hasAccount)
-					}}>{hasAccount ? 'Sign Up' : 'Sign In'}</Text>
+					<Text style={{ color: 'white', fontWeight: 600 }} onPress={toggleHasAccount}>{hasAccount ? 'Sign Up' : 'Sign In'}</Text>
 				</Animated.View>
-				<View style={{ marginTop: 100, display: 'flex', flexDirection: 'column', alignItems: 'center', paddingVertical: 10 }}>
+				<View style={{ marginTop: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', paddingVertical: 10, paddingBottom: 70 }}>
 					<TouchableOpacity style={styles.button} onPress={handleSignUp}>
-						<Text style={styles.buttonText}>{hasAccount ? 'Sign In' : 'Sign Up'}</Text>
+						{signUpLoading ? <Loading size={60} color={'#ffffff'} /> : <Text style={styles.buttonText}>{hasAccount ? 'Sign In' : 'Sign Up'}</Text>}
 					</TouchableOpacity>
 					{/* <Text style={{ fontSize: 12, marginTop: 10, color: 'white' }}>(it's free)</Text> */}
 					<TouchableOpacity style={[styles.skipButton, { marginTop: 30 }]} onPress={onSkip}>
 						<Text style={styles.skipButtonText}>Nevermind</Text>
 					</TouchableOpacity>
 				</View>
-			</View>
-		</KeyboardAvoidingView>
+			</View >
+		</TouchableWithoutFeedback>
 	)
 }
 const styles = StyleSheet.create({
@@ -152,8 +158,8 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		display: 'flex',
 		flexDirection: 'column',
-		height: 300,
-		marginTop: Dimensions.get('screen').height / 3
+		height: '100%',
+		paddingTop: Dimensions.get('screen').height / 3,
 	},
 	heading: {
 		fontSize: 24,
@@ -179,7 +185,8 @@ const styles = StyleSheet.create({
 		borderRadius: 5,
 		marginBottom: 10,
 		paddingHorizontal: 10,
-		color: 'white'
+		color: 'white',
+		backgroundColor: 'rgba(255, 255, 255, 0.2'
 	},
 	button: {
 		display: 'flex',
