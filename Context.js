@@ -66,7 +66,8 @@ const GlobalStateProvider = ({ children }) => {
 						user: {
 							uid: user.uid,
 							isAnonymous: user.isAnonymous ? true : false,
-							id_token: idToken
+							id_token: idToken,
+							email: user.isAnonymous ? null : user.email
 						}
 					})
 
@@ -109,7 +110,7 @@ const GlobalStateProvider = ({ children }) => {
 								uid: user.uid,
 								isAnonymous: user.isAnonymous ? true : false,
 								id_token: idToken ? idToken : null,
-								email: user.isAnonymous ? '' : user.email
+								email: user.isAnonymous ? null : user.email
 							}
 						})
 					} catch (err) {
