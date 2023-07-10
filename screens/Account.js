@@ -10,13 +10,14 @@ import SignOutDialog from '../components/SignOutDialog'
 const auth = getAuth(firebase)
 
 const Account = () => {
-	const [user, setUser] = useState(null)
 	const [displayName, setDisplayName] = useState('')
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
 	const [confirmPassword, setConfirmPassword] = useState('')
 	const [isEditing, setIsEditing] = useState(false)
 	const [state, dispatch] = useGlobalState()
+	const [user, setUser] = useState(state.user)
+	const [isDeleting, setIsDeleting] = useState(state.user.isAnonymous ? true : false)
 
 	useEffect(() => {
 		// Fetch the current user data
@@ -25,27 +26,6 @@ const Account = () => {
 		setDisplayName(currentUser?.displayName)
 		setEmail(currentUser?.email)
 	}, [])
-
-	useEffect(() => {
-		// const getUser = async () => {
-		// 	const response = await fetch('http://localhost:3000/api/user', {
-		// 		headers: {
-		// 			'Authentication': `Bearer ${state.user.id_token}`
-		// 		}
-		// 	})
-
-		// 	if (!response.ok) {
-		// 		throw new Error('Failed to fetch user data')
-		// 	}
-
-		// 	const data = await response.json()
-
-		// 	return data
-		// }
-
-		// getUser()
-	})
-
 
 	const saveChanges = async () => {
 		try {
@@ -75,19 +55,20 @@ const Account = () => {
 		}
 	}
 
-	const handleSignOut = async () => {
+	const handleSignOut = async (isDeleting) => {
+		setIsDeleting(isDeleting)
 		await dispatch({ ...state, modal: { ...state.modal, signOut: true } })
 	}
 
 	if (state.user.isAnonymous) {
 		return (
-			<View style={{ paddingTop: 0, paddingBottom: 70, display: 'flex', justifyContent: 'space-between', flexDirection: 'column', flex: 1 }}>
+			<View style={{ paddingHorizontal: 20, paddingTop: 0, paddingBottom: 60, display: 'flex', justifyContent: 'space-between', flexDirection: 'column', flex: 1 }}>
 				<SignOutDialog />
-				<TouchableOpacity onPress={() => {
+				{/* <TouchableOpacity onPress={() => {
 					dispatch({ ...state, user: { ...state.user, isAnonymous: !state.user.isAnonymous } })
 				}}>
 					<Text>SWITCH USER</Text>
-				</TouchableOpacity>
+				</TouchableOpacity> */}
 
 				<View style={{ flex: 1 }}>
 					<Text style={styles.textArea}>I don't know who you are</Text>
@@ -116,7 +97,7 @@ const Account = () => {
 						<Text style={styles.buttonText}>Create Free Account</Text>
 					</TouchableOpacity>
 					<TouchableOpacity style={[styles.cancelButton]} onPress={handleSignOut}>
-						<Text style={styles.cancelButtonText}>Sign Out{state.user.isAnonymous && ' and Delete'}</Text>
+						<Text style={styles.cancelButtonText}>Delete Everything</Text>
 					</TouchableOpacity>
 				</View>
 			</View>
@@ -125,16 +106,13 @@ const Account = () => {
 
 	return (
 		<View style={styles.container}>
-			<SignOutDialog isDeleting={true}/>
-
-
+			<SignOutDialog isDeleting={isDeleting}/>
 			<View style={{ flex: 1 }}>
 				<Text style={styles.textArea}>You signed up as {state.user.email}</Text>
 				<Text style={[styles.textArea, { marginBottom: 10, marginTop: 20 }]}>
 					You can delete your account, or contact support - wait times should be tiny. Official sign ups (with emails, like yours) will get priority.
 				</Text>
 			</View>
-
 
 			{isEditing && (
 				<>
@@ -158,24 +136,14 @@ const Account = () => {
 				</>
 			)}
 
-			{/* {isEditing && (
-				<TouchableOpacity style={styles.cancelButton} onPress={() => setIsEditing(false)}>
-					<Text style={styles.cancelButtonText}>Cancel</Text>
-				</TouchableOpacity>
-			)} */}
-			<TouchableOpacity onPress={() => {
-				dispatch({ ...state, user: { ...state.user, isAnonymous: !state.user.isAnonymous } })
-			}}>
-				<Text>SWITCH USER</Text>
-			</TouchableOpacity>
 			<View style={[styles.buttonContainer]}>
 				<TouchableOpacity style={[styles.textOnly, { textAlign: 'center' }]} onPress={() => { console.log("Copy uid") }}>
 					<Text style={{ textAlign: 'center' }}>User ID: {state.user.uid}</Text>
 				</TouchableOpacity>
-				<TouchableOpacity style={[styles.cancelButton]} onPress={() => handleSignOut()}>
+				<TouchableOpacity style={[styles.cancelButton]} onPress={() => handleSignOut(true)}>
 					<Text style={styles.cancelButtonText}>Delete User</Text>
 				</TouchableOpacity>
-				<TouchableOpacity style={[styles.cancelButton]} onPress={handleSignOut}>
+				<TouchableOpacity style={[styles.cancelButton]} onPress={() => handleSignOut(false)}>
 					<Text style={styles.cancelButtonText}>Sign Out</Text>
 				</TouchableOpacity>
 			</View>
@@ -194,7 +162,6 @@ const styles = StyleSheet.create({
 		marginBottom: 8,
 		width: '49%',
 		height: 50,
-
 	},
 	textArea: {
 		fontSize: 18,
@@ -229,7 +196,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'flex-end',
 		// marginTop: 10,
 		width: '100%',
-		paddingHorizontal: 20,
+		// paddingHorizontal: 20,
 		flex: 1
 	},
 	container: {
@@ -239,7 +206,8 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'space-between',
 		marginTop: 50,
-		paddingBottom: 60
+		paddingBottom: 60,
+		paddingHorizontal: 20
 	},
 	title: {
 		fontSize: 18,
