@@ -116,6 +116,7 @@ const SignUpForm = ({ onSkip }) => {
 					onChangeText={setEmail}
 					keyboardType="email-address"
 					placeholderTextColor={'#dddddd'}
+					selectionColor={'white'}
 				/>
 				{showErrors && errors.email && <View><Text style={styles.errorText}>{errors.email}</Text></View>}
 				<TextInput
@@ -123,8 +124,9 @@ const SignUpForm = ({ onSkip }) => {
 					placeholder="Password"
 					value={password}
 					onChangeText={setPassword}
-					secureTextEntry
+					secureTextEntry={true}
 					placeholderTextColor={'#dddddd'}
+					selectionColor={'white'}
 				/>
 				{showErrors && errors.password && <View><Text style={styles.errorText}>{errors.password}</Text></View>}
 				<Animated.View
@@ -142,8 +144,9 @@ const SignUpForm = ({ onSkip }) => {
 						value={confirmPassword}
 						onChangeText={setConfirmPassword}
 						placeholderTextColor={'#dddddd'}
-						secureTextEntry
-					/>
+						secureTextEntry={true}
+						selectionColor={'white'}
+						/>
 					{showErrors && !hasAccount && errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
 				</Animated.View>
 				<Animated.View style={{ flex: 1, color: 'white', display: 'flex', flexDirection: 'row', transform: [{ translateY }] }}>

@@ -17,7 +17,8 @@ items:{
 
 */
 
-const getItems = ({uid, boxId = null}, callback) => {
+const getItems = ({uid, id = null}, callback) => {
+	const boxId = id
 	try {
 		let itemQuery
 		if(boxId){
@@ -26,7 +27,7 @@ const getItems = ({uid, boxId = null}, callback) => {
 			itemQuery = query(collection(firestore, 'items'), where('ownerId', '==', uid))
 		}
 
-		const unsubItems = onSnapshot(itemQuery, (snapshot) => {
+		const unsubItems = onSnapshot(itemQuery, async (snapshot) => {
 			const items = []
 
 			snapshot.forEach((doc) => {

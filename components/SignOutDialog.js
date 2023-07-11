@@ -69,9 +69,9 @@ const SignOutDialog = ({ isDeleting = false }) => {
 						<Text style={styles.dialogText}>
 							{(state.user.isAnonymous || isDeleting) ? "Are you sure?" : 'Sign Out'}
 						</Text>
-						<View style={{ textAlign: 'center', width: '100%', padding: 10, marginBottom: 20 }} >
-							{(isDeleting || state.user.isAnonymous) && <Text>You cannot undo this. Any information you have stored here will be <Text style={{ fontWeight: "bold" }}>permanently</Text> deleted.</Text>}
-							{!isDeleting && !state.user.isAnonymous && <Text>We'll keep the light on!</Text>}
+						<View style={{ width: '100%', padding: 10, marginBottom: 20 }} >
+							{(isDeleting || state.user.isAnonymous) && <Text style={{textAlign: 'center'}}>You cannot undo this. Any information you have stored here will be <Text style={{ fontWeight: "bold" }}>permanently</Text> deleted.</Text>}
+							{!isDeleting && !state.user.isAnonymous && <Text style={{textAlign: 'center'}}>We'll keep the light on!</Text>}
 						</View>
 
 						<View style={[styles.addBoxButtonContainer]}>
@@ -138,17 +138,19 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: 'bold',
 		textAlign: 'center',
-		minWidth: 80
+		minWidth: 80,
+		flex: 1,
+		height: 40,
 	},
 	dialogContainer: {
 		// flex: 0,
+		display: 'flex',
 		backgroundColor: 'white',
 		borderRadius: 10,
 		width: '100%',
 	},
 	dialogContent: {
 		display: 'flex',
-		height: '100%',
 		justifyContent: 'space-between',
 		alignItems: 'center',
 		paddingHorizontal: 10
@@ -174,10 +176,11 @@ const styles = StyleSheet.create({
 		padding: 10,
 		borderRadius: 5,
 		marginBottom: 10,
+		height: 40
 	},
 	addBoxButtonContainer: {
-		flex: 1,
 		width: '100%',
+		minHeight: 90
 	},
 	redButton: {
 		backgroundColor: '#FF3B30',

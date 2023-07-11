@@ -12,7 +12,7 @@ const colors = {
 		fontColor: 'black',
 	},
 	error: {
-		hex: '#FF0060',
+		hex: '#FF3B30',
 		fontColor: 'white',
 	},
 	text: {

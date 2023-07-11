@@ -48,9 +48,9 @@ const DeleteItemDialog = () => {
 									<Text style={styles.buttonText}>{deleteLoading ? <Loading size={'small'} color={'#ffffff'} /> : 'Delete'}</Text>
 								</TouchableOpacity>
 							</View>
-							<View>
+							<View style={styles.topRowButtons}>
 								<TouchableOpacity
-									style={[styles.dialogButton, styles.greyButton, { marginTop: 10 }]}
+									style={[styles.dialogButton, styles.greyButton]}
 									onPress={() => cancelDelete()}
 								>
 									<Text style={styles.buttonText}>Nevermind</Text>
@@ -67,58 +67,70 @@ const DeleteItemDialog = () => {
 const styles = StyleSheet.create({
 	container: {
 		display: 'flex',
-		width: '100%',
+		// width: '100%',
 		flex: 1,
 		justifyContent: 'flex-end',
 		alignItems: 'center',
-		paddingBottom: 70
+		// marginBottom: 70
+		background: 'white'
+	},
+	deleteButton: {
+		backgroundColor: 'red',
+		padding: 10,
+		borderRadius: 5,
 	},
 	buttonText: {
 		color: 'white',
 		fontSize: 16,
 		fontWeight: 'bold',
 		textAlign: 'center',
+		flex: 1
 	},
 	dialogContainer: {
-		height: 200,
-		width: '100%',
 		backgroundColor: 'white',
 		borderRadius: 10,
-		shadowColor: '#000',
-		shadowOffset: { width: 0, height: -2 },
-		shadowOpacity: 0.1,
-		shadowRadius: 4,
-		elevation: 5,
+		width: '100%',
+		marginBottom: 70,
+		// paddingBottom: 10
 	},
 	dialogContent: {
-		flex: 1,
-		justifyContent: 'center',
+		display: 'flex',
+		justifyContent: 'space-between',
 		alignItems: 'center',
+		paddingHorizontal: 10
 	},
 	dialogText: {
 		fontSize: 22,
-		marginBottom: 20,
+		textAlign: 'center',
+		padding: 0,
+		marginVertical: 10,
+		flex: 0
+	},
+	subDialogText: {
+		fontSize: 14,
 		textAlign: 'center',
 		marginBottom: 20,
-		padding: 10
+		flex: 0
 	},
 	topRowButtons: {
+		flex: 0,
 		flexDirection: 'row',
 		height: 40,
+		marginBottom: 10,
 		width: '100%',
-		justifyContent: 'space-around'
+		justifyContent: 'space-between'
 	},
 	buttonContainer: {
-		flexDirection: 'column',
-		justifyContent: 'center',
-		height: 80,
-		width: '100%'
+		// flex: 1,
+		width: '100%',
+		// height: 110
 	},
 	dialogButton: {
+		width: '100%',
 		flex: 1,
 		padding: 10,
+		height: 40,
 		borderRadius: 5,
-		marginHorizontal: 10,
 	},
 	redButton: {
 		backgroundColor: colors.error.hex,
@@ -133,5 +145,4 @@ const styles = StyleSheet.create({
 		color: colors.lightgrey.fontColor
 	},
 })
-
 export default DeleteItemDialog

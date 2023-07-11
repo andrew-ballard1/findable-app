@@ -101,13 +101,13 @@ const App = () => {
 							<Stack.Screen name="Items" component={ItemList} />
 							<Stack.Screen name="Account" component={Account} />
 						</Stack.Navigator>
-						<Footer user={{ isAnonymous: state.user.isAnonymous }} />
+						{/* <Footer user={{ isAnonymous: state.user.isAnonymous }} /> */}
 					</ContentContainer>
 				</NavigationContainer>
 			)
 		} catch (e) {
 			return (
-				<View style={{display: 'flex', flex: 1, marginTop: 100, justifyContent: 'center'}}>
+				<View style={{display: 'flex', flex: 1, marginTop: 100, justifyContent: 'center', paddingTop: 200}}>
 					<Text>App.js Error</Text>
 					<Text>{inspect(e, {depth: 5})}</Text>
 				</View>

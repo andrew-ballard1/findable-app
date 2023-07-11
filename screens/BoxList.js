@@ -49,6 +49,10 @@ const BoxList = ({ route }) => {
 	}, [showDeleteDialog])
 
 
+	// useEffect(() => {
+	// 	dispatch({...state, boxes})
+	// }, [boxes])
+
 	const handleAddBox = async () => {
 		// Logic to add a new box
 		await dispatch({ ...state, modal: { ...state.modal, addBox: true } })
@@ -89,11 +93,11 @@ const BoxList = ({ route }) => {
 				style={index % 2 ? styles.boxGridItemAlt : styles.boxGridItem}
 				onPress={() => {
 					console.log(item)
-					navigation.navigate('Stuff', { boxId: item.id, isAdding: false, boxLabel: item.label })
+					navigation.navigate('Stuff', { box: item, isAdding: false })
 				}}
 			>
 				<TouchableOpacity
-					style={[styles.gridDeleteButton, { position: 'absolute', width: 26, height: 26, right: 5, top: 5 }]}
+					style={[styles.gridDeleteButton, { elevation: 10, position: 'absolute', width: 30, height: 30, right: 5, top: 5 }]}
 					onPress={() => promptDelete({ label: item.label, boxId: item.id })}
 				>
 					<DeleteIcon style={[styles.gridDeleteIcon]} size={20} />
@@ -132,7 +136,7 @@ const BoxList = ({ route }) => {
 	return (
 		<View key="boxViewComponent" style={styles.container}>
 			<View style={styles.header}>
-				<Text style={[styles.title, {width: '50%'}]}>Your Stuff</Text>
+				<Text style={[styles.title, {textAlign: 'center', width: '50%'}]}>Your Stuff</Text>
 				<View style={[styles.viewModeButtons, {width: '50%'}]}>
 					<TouchableOpacity
 						style={[styles.dialogButton, viewMode == 'grid' ? styles.blueButton : styles.greyButton]}

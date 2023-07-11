@@ -2,6 +2,7 @@ import { collection, query, where, doc, addDoc, deleteDoc, updateDoc, setDoc, ge
 import { firestore } from '../firebase'
 import { getItems, getItemsByBox } from './itemHelpers'
 
+
 const getBoxes = async (uid, callback) => {
 	try {
 		const boxQuery = query(collection(firestore, 'boxes'), where('ownerId', '==', uid))
@@ -14,7 +15,7 @@ const getBoxes = async (uid, callback) => {
 			boxedItems.push(item)
 		})
 
-		const unsubBoxes = onSnapshot(boxQuery, (snapshot) => {
+		const unsubBoxes = onSnapshot(boxQuery, async (snapshot) => {
 			const boxes = []
 
 			snapshot.forEach((doc) => {

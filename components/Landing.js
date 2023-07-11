@@ -76,28 +76,6 @@ const Landing = () => {
 		}
 	}, [showSignUpForm])
 
-	// const [isLoading, setIsLoading] = useState(false)
-
-	// useEffect(() => {
-	// 	const unsubscribe = onAuthStateChanged(auth, (user) => {
-	// 		if (user) {
-	// 			if (user.isAnonymous) {
-	// 				console.log('Anonymous user is signed in:', user.uid);
-	// 			} else {
-	// 				console.log('Email/password user is signed in:', user.uid);
-	// 			}
-	// 			// Redirect the user to the appropriate screen based on their authentication status
-	// 		} else {
-	// 			console.log('User is signed out');
-	// 		}
-	// 		setIsLoading(false)
-	// 	});
-
-	// 	return () => {
-	// 		unsubscribe();
-	// 	};
-	// }, []);
-
 	const handleSkip = () => {
 		const skip = async () => {
 			await signInAnonymously(auth).then(async (user) => {

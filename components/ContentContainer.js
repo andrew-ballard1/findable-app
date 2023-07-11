@@ -2,18 +2,20 @@ import React from 'react'
 import {
 	StyleSheet,
 	// SafeAreaView,
-	// ScrollView, 
+	ScrollView, 
 	// Dimensions,
 	// View
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import Footer from './Footer'
 
 const ContentContainer = ({ children }) => {
 	return (
 		<SafeAreaView style={styles.safeContainer}>
-			{/* <ScrollView contentContainerStyle={styles.contentContainer}> */}
+			<ScrollView contentContainerStyle={styles.contentContainer}>
 				{children}
-			{/* </ScrollView> */}
+			</ScrollView>
+			<Footer />
 		</SafeAreaView>
 	)
 }

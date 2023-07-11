@@ -9,15 +9,15 @@ import { deleteItem, getItems } from '../helpers/itemHelpers'
 import { useGlobalState } from '../Context'
 
 const Box = ({ route }) => {
-	const [viewMode, setViewMode] = useState('line')
 	const [items, setItems] = useState([])
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 	const [state, dispatch] = useGlobalState()
 	const [deleteLoading, setDeleteLoading] = useState(false)
-	const { boxId, boxLabel } = route.params
-
+	const box = route.params.box
+	const {id, label, description} = box
+	console.log(box)
 	useEffect(() => {
-		const unsubItems = getItems({ uid: state.user.uid, boxId }, (items) => {
+		const unsubItems = getItems({ uid: state.user.uid, id }, (items) => {
 			setItems(items)
 		})
 
@@ -28,15 +28,11 @@ const Box = ({ route }) => {
 	}, [])
 
 	const handleAddItem = async () => {
-		// Logic to add a new box
 		console.log("Adding item")
 		await dispatch({ ...state, modal: { ...state.modal, addItem: true } })
-		// setShowAddDialog(true)
 	}
 
 	const promptDelete = async ({ label, itemId }) => {
-		// string label or false
-		// setShowDeleteDialog(label)
 		await dispatch({ ...state, modal: { ...state.modal, deleteItem: { label, itemId } } })
 	}
 
@@ -47,25 +43,6 @@ const Box = ({ route }) => {
 		await deleteItem(itemId)
 		setDeleteLoading(false)
 		promptDelete(false)
-	}
-
-	const renderItemGridItem = ({ item, index }) => {
-		// needs to be named item. For fucks sake.
-		return (
-			<TouchableOpacity style={index % 2 ? styles.itemGridAlt : styles.itemGrid}>
-				<TouchableOpacity
-					style={[styles.gridDeleteButton, { position: 'absolute', width: 26, height: 26, right: 5, top: 5 }]}
-					onPress={() => promptDelete(item.label)}
-				>
-					<DeleteIcon style={[styles.gridDeleteIcon]} size={20} />
-				</TouchableOpacity>
-
-				<Text style={styles.itemLabel}>{item.label}</Text>
-				<Text style={styles.itemDescription}>{item.description}</Text>
-				{/* <Text style={styles.itemGrid}>{item.items.length} thing{item.items.length != 1 ? 's' : ''}</Text> */}
-				<Text style={styles.itemLastAccessed}>Opened {item.lastOpened}</Text>
-			</TouchableOpacity>
-		)
 	}
 
 	const renderItemLineItem = ({ item }) => (
@@ -88,21 +65,8 @@ const Box = ({ route }) => {
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
-				<Text style={styles.title}>{boxLabel}</Text>
-				<View style={styles.viewModeButtons}>
-					<TouchableOpacity
-						style={[styles.dialogButton, viewMode == 'grid' ? styles.blueButton : styles.greyButton]}
-						onPress={() => setViewMode('grid')}
-					>
-						<Text style={styles.buttonText}>Grid</Text>
-					</TouchableOpacity>
-					<TouchableOpacity
-						style={[styles.dialogButton, viewMode == 'line' ? styles.blueButton : styles.greyButton]}
-						onPress={() => setViewMode('line')}
-					>
-						<Text style={styles.buttonText}>Line</Text>
-					</TouchableOpacity>
-				</View>
+				<Text style={[styles.title, {textAlign: 'center', width: '100%'}]}>{label}</Text>
+				<Text style={[styles.subtitle, {textAlign: 'center', width: '100%'}]}>{description}</Text>
 			</View>
 
 			<TouchableOpacity
@@ -112,25 +76,14 @@ const Box = ({ route }) => {
 				<Text style={styles.buttonText}>Add New Item</Text>
 			</TouchableOpacity>
 
-			{viewMode === 'grid' ? (
-				<FlatList
-					key={'grid'}
-					data={items}
-					renderItem={renderItemGridItem}
-					ListEmptyComponent={EmptyListComponent}
-					numColumns={2}
-				/>
-			) : (
-				<FlatList
-					key={'line'}
-					data={items}
-					// keyExtractor={(item) => item.id.toString()}
-					renderItem={renderItemLineItem}
-					numColumns={1}
-				/>
-			)}
+			<FlatList
+				key={'line'}
+				data={items}
+				renderItem={renderItemLineItem}
+				numColumns={1}
+			/>
 
-			<AddItemDialog box={boxId} />
+			<AddItemDialog box={id} />
 			<DeleteItemDialog />
 		</View>
 	)
@@ -182,7 +135,6 @@ const styles = StyleSheet.create({
 		flex: 1,
 		paddingVertical: 10,
 		borderRadius: 5,
-		// marginHorizontal: 10,
 	},
 	redButton: {
 		backgroundColor: colors.error.hex,
@@ -204,7 +156,7 @@ const styles = StyleSheet.create({
 		overflow: 'hidden'
 	},
 	header: {
-		flexDirection: 'row',
+		flexDirection: 'column',
 		justifyContent: 'space-between',
 		alignItems: 'center',
 		marginBottom: 20,
@@ -212,6 +164,11 @@ const styles = StyleSheet.create({
 	title: {
 		fontSize: 24,
 		fontWeight: 'bold',
+		textAlign: 'center'
+	},
+	subtitle: {
+		fontSize: 14,
+		textAlign: 'center'
 	},
 	viewModeButtons: {
 		flexDirection: 'row',

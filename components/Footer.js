@@ -3,8 +3,11 @@ import { View, StyleSheet, TouchableOpacity, Text } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import { SearchIcon, CatalogIcon, ItemListIcon, AccountIcon, AccountAnonymousIcon } from '../svgs/Icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useGlobalState } from '../Context'
 
-const Footer = ({ user }) => {
+const Footer = () => {
+	const [state, dispatch] = useGlobalState()
+	const user = state.user
 	const navigation = useNavigation()
 	const { bottom } = useSafeAreaInsets()
 	console.log(user)

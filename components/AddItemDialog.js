@@ -20,6 +20,7 @@ const AddItemDialog = ({ box = '' }) => {
 	useEffect(() => {
 		const getBoxList = async () => {
 			const boxList = await getBoxesOnce(state.user.uid)
+			await dispatch({...state, boxes: boxList})
 			setBoxes(boxList.map((item) => {
 				return { label: item.label, value: item.id }
 			}))
@@ -71,7 +72,7 @@ const AddItemDialog = ({ box = '' }) => {
 							Add a new thing!
 						</Text>
 						<View
-							style={{ display: 'flex', flexDirection: 'column', flex: 1, width: '100%', padding: 10, marginBottom: 20 }}
+							style={{ display: 'flex', flexDirection: 'column', flex: 1, width: '100%', padding: 0, marginBottom: 20 }}
 						>
 							<TextInput
 								style={styles.dialogInput}
@@ -141,6 +142,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		borderRadius: 5,
 		paddingLeft: 5,
+		marginHorizontal: 10,
 		marginBottom: 5,
 		flex: 1,
 		color: '#333333'

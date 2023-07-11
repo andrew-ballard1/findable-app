@@ -14,7 +14,9 @@ const auth = getAuth(firebase)
 console.log(auth)
 
 const globalState = {
-	groups: [],
+	activities: [],
+	posts: [],
+	boxes: [],
 	items: [],
 	user: 'isLoading',
 	auth,

@@ -1,21 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { View, Text, TextInput, TouchableOpacity, FlatList, Animated } from 'react-native'
+import { View, Text, TouchableOpacity, Animated, Image } from 'react-native'
 import VerticalCarousel from './VerticalCarousel'
 import { useNavigation } from '@react-navigation/native'
 import * as Location from 'expo-location'
 import { useGlobalState } from '../Context'
+
+import boxes from '../assets/boxes.jpg'
+import activities from '../assets/activities.jpg'
+import things from '../assets/things.jpg'
+import map from '../assets/map.jpg'
+
 // import * as Sentry from 'sentry-expo'
 
 const styles = {
 	container: {
-		// flex: 100,
 		display: 'flex',
 		flexDirection: 'column',
 		alignItems: 'center',
 		justifyContent: 'flex-start',
 		paddingHorizontal: 20,
 		marginTop: 50,
-		// paddingVertical: 50,
 		paddingBottom: 200
 	},
 	header: {
@@ -26,17 +30,12 @@ const styles = {
 	searchContainer: {
 		width: '100%',
 		marginBottom: 0,
-		// overflow: 'hidden',
-		// height: 60,
 	},
 	searchResults: {
-		// flexGrow: 0,
 		width: '100%',
 		marginBottom: 0,
 		marginTop: 0,
 		overflow: 'hidden',
-		// height: 10,
-		// minHeight: 0,
 	},
 	searchBar: {
 		height: 40,
@@ -47,15 +46,14 @@ const styles = {
 		backgroundColor: 'white'
 	},
 	button: {
-		display: 'flex',
+		position: 'relative',
 		textAlign: 'center',
-		justifyContent: 'center',
-		alignContent: 'center',
-		backgroundColor: '#0079FF',
-		borderRadius: 8,
-		marginBottom: 8,
-		width: '49%',
-		height: 50,
+		borderRadius: 10,
+		marginHorizontal: 10,
+		marginBottom: 10,
+		flex: 0,
+		width: '100%',
+		height: 200
 
 	},
 	buttonText: {
@@ -64,24 +62,33 @@ const styles = {
 		fontWeight: 'bold',
 		textAlign: 'center'
 	},
+	// buttonImage:{
+	// 	position: 'absolute',
+	// 	width: '100%',
+	// 	height: '100%'
+	// },
 	itemContainer: {
 		borderBottomWidth: '1px',
 		borderBottomColor: '#dddddd',
-		padding: 10,
 		marginBottom: 8,
 		borderRadius: 8,
 	},
 	buttonContainer: {
-		// flex: 1,
-		height: '50%',
+		flex: 1,
 		display: 'flex',
-		flexDirection: 'row',
+		flexDirection: 'column',
 		alignContent: 'flex-start',
 		textAlign: 'center',
 		justifyContent: 'space-between',
-		flexWrap: 'wrap',
-		marginTop: 10
-		// opacity: 1
+		width: '100%'
+	},
+	textShadow: {
+		textShadowColor: 'rgba(0, 0, 0, 1)',
+		textShadowOffset: { width: 0, height: 0 },
+		textShadowRadius: 4,
+		// shadowColor: 'rgba(0,0,0,0.15)',
+		// shadowRadius: 3,
+		// backgroundColor: 'rgba(0,0,0,0.15)',
 	}
 }
 
@@ -104,14 +111,14 @@ const Dashboard = () => {
 	const getLocation = async () => {
 		let { status } = await Location.requestForegroundPermissionsAsync()
 		if (status !== 'granted') {
-			await dispatch({...state, location: false})
+			await dispatch({ ...state, location: false })
 			setLocErr('Permission to access location was denied')
 			return
 		}
 
 		let location = await Location.getCurrentPositionAsync({})
 		setLocation(location)
-		await dispatch({...state, location})
+		await dispatch({ ...state, location })
 
 	}
 
@@ -120,7 +127,7 @@ const Dashboard = () => {
 	}, [])
 
 	useEffect(() => {
-		if(!state.location){
+		if (!state.location) {
 			try {
 				getLocation()
 			} catch (error) {
@@ -146,17 +153,11 @@ const Dashboard = () => {
 		setFilteredItems(filteredItems)
 	}
 
-	const renderButton = (title, onPress) => (
-		<TouchableOpacity style={styles.button} onPress={onPress}>
-			<Text style={styles.buttonText}>{title}</Text>
+	const renderButton = ({ title, onPress, img }) => (
+		<TouchableOpacity delayPressIn={80} style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', margin: 10, borderRadius: 10, minHeight: 200, overflow: 'hidden', shadowColor: 'rgba(0,0,0,0.15)', shadowRadius: 5 }} onPress={onPress}>
+			<Image style={{ flex: 0, position: 'absolute', left: 0, top: 0, width: '100%', height: 200 }} source={img} resizeMode='cover' />
+			<Text style={[styles.buttonText, styles.textShadow, { zIndex: 10 }]}>{title}</Text>
 		</TouchableOpacity>
-	)
-
-	const renderListItem = ({ item }) => (
-		<View style={styles.itemContainer}>
-			<Text>{item.label}</Text>
-			{/* Render additional item details as needed */}
-		</View>
 	)
 
 	const messages = [
@@ -174,53 +175,52 @@ const Dashboard = () => {
 
 	return (
 		<View style={styles.container}>
-			{/* <Text style={styles.header}>What's up today?</Text> */}
 			<View style={{ height: 0, marginTop: 5 }}>
 				<VerticalCarousel messages={messages} />
 			</View>
-			{/* <Text style={styles.header}>
-			</Text> */}
 
-			<View style={[styles.searchContainer]} >
-				<TextInput
-					style={styles.searchBar}
-					placeholder="Search..."
-					value={searchText}
-					onChangeText={handleSearchTextChange}
-				/>
+			<View style={{marginVertical: 20, paddingHorizontal: 15}}>
+				<Text style={{marginBottom: 10}}>Hi, thanks for trying Findable!</Text>
+				<Text style={{marginBottom: 10}}>You can use this app to catalog anything and everything, from books to car parts. Findables can be stored in cubbies, boxes, shelves, drawers, or any kind of container you can imagine.</Text>
+				<Text>When you add new boxes, set your location -  the next time you enter within 25 meters of this place, we'll send you a reminder to update your findables.</Text>
 			</View>
-			{/* <Animated.View style={[styles.searchResults, { opacity: searchResultsOpacity, minHeight: searchResultsHeight }]}>
-				<FlatList
-					data={filteredItems}
-					renderItem={renderListItem}
-					keyExtractor={(item) => item.id}
-				/>
-			</Animated.View> */}
+			{/* You have X items, X boxes, etc stuff here */}
+			{/* <View style={{display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', textAlign: 'left', width: '100%', padding: 10}}>
+				<Text>Items: {state.items.length}</Text>
+				<Text>Boxes: {state.boxes.length}</Text>
+				<Text>Activities: {state.activities.length}</Text>
+				<Text>Posts: {state.posts.length}</Text>
+			</View> */}
 
-			<Animated.View style={[styles.buttonContainer, { opacity: buttonsOpacity }]}>
-				{renderButton('New Item', () => {
-					navigation.navigate('Items', { isAdding: true })
-					// Handle Add New Box button press
+			<View style={[styles.buttonContainer]}>
+				{renderButton({
+					title: 'Add a New Item',
+					img: things,
+					onPress: () => {
+						navigation.navigate('Items', { isAdding: true })
+					}
 				})}
-				{renderButton('New Box', () => {
-					// Handle View All Items button press
-					navigation.navigate('Boxes', { isAdding: true })
+				{renderButton({
+					title: 'Create a New Collection',
+					img: boxes,
+					onPress: () => {
+						navigation.navigate('Boxes', { isAdding: true })
+					}
 				})}
-				{renderButton('Set Location', () => {
-					getLocation()
-					// Handle View All Items button press
+				{renderButton({
+					title: 'Set Storage Location',
+					img: map,
+					onPress: () => {
+						getLocation()
+					}
 				})}
-				{renderButton('View Activities', () => {
-					// Handle View Activities button press
+				{renderButton({
+					title: 'View Your Activities',
+					img: activities,
+					onPress: () => {
+					}
 				})}
-				{/* {renderButton('Share Boxes', () => {
-					// Handle Share Boxes button press
-				})}
-				{renderButton('Share Activity', () => {
-					// Handle Share Activity button press
-				})} */}
-			</Animated.View>
-
+			</View>
 		</View>
 	)
 }

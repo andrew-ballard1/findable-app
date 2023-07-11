@@ -26,26 +26,27 @@ const DeleteBoxDialog = ({ boxDetails, deleteAllItems, deleteBoxOnly, deleteLoad
 				<View style={styles.dialogContainer}>
 					<View style={styles.dialogContent}>
 						<Text style={styles.dialogText}>
-							Do you want to delete everything in "{label}" too?
+							Are you sure?
 						</Text>
+						<Text style={styles.subDialogText}>Delete {label}</Text>
 						<View style={styles.buttonContainer}>
 							<View style={styles.topRowButtons}>
 								<TouchableOpacity
-									style={[styles.dialogButton, styles.redButton]}
+									style={[styles.dialogButton, styles.redButton, {marginRight: 5}]}
 									onPress={() => deleteAllItems({ boxId, label })}
 								>
 									<Text style={styles.buttonText}>{deleteLoading ? <Loading size={'small'} color={'#ffffff'} /> : 'Box and Items'}</Text>
 								</TouchableOpacity>
 								<TouchableOpacity
-									style={[styles.dialogButton, styles.blueButton]}
+									style={[styles.dialogButton, styles.blueButton, {marginLeft: 5}]}
 									onPress={() => deleteBoxOnly({ boxId, label })}
 								>
 									<Text style={styles.buttonText}>Box Only</Text>
 								</TouchableOpacity>
 							</View>
-							<View>
+							<View styles={{height: 40, marginTop: 10}}>
 								<TouchableOpacity
-									style={[styles.dialogButton, styles.greyButton, { marginTop: 10 }]}
+									style={[styles.dialogButton, styles.greyButton, {width: '100%', flex: 0}]}
 									onPress={() => cancelDelete(boxId)}
 								>
 									<Text style={styles.buttonText}>Nevermind</Text>
@@ -62,11 +63,12 @@ const DeleteBoxDialog = ({ boxDetails, deleteAllItems, deleteBoxOnly, deleteLoad
 const styles = StyleSheet.create({
 	container: {
 		display: 'flex',
-		width: '100%',
+		// width: '100%',
 		flex: 1,
 		justifyContent: 'flex-end',
 		alignItems: 'center',
-		paddingBottom: 70
+		// marginBottom: 70
+		background: 'white'
 	},
 	deleteButton: {
 		backgroundColor: 'red',
@@ -78,47 +80,53 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: 'bold',
 		textAlign: 'center',
+		flex: 1
 	},
 	dialogContainer: {
-		height: 200,
 		backgroundColor: 'white',
 		borderRadius: 10,
-		shadowColor: '#000',
 		width: '100%',
-		shadowOffset: { width: 0, height: -2 },
-		shadowOpacity: 0.1,
-		shadowRadius: 4,
-		elevation: 5,
+		marginBottom: 70,
+		paddingBottom: 10
 	},
 	dialogContent: {
-		flex: 1,
-		justifyContent: 'center',
+		display: 'flex',
+		justifyContent: 'space-between',
 		alignItems: 'center',
+		paddingHorizontal: 10
 	},
 	dialogText: {
 		fontSize: 22,
-		marginBottom: 20,
+		textAlign: 'center',
+		padding: 0,
+		marginVertical: 10,
+		flex: 0
+	},
+	subDialogText: {
+		fontSize: 14,
 		textAlign: 'center',
 		marginBottom: 20,
-		padding: 10
+		flex: 0
 	},
 	topRowButtons: {
+		flex: 0,
 		flexDirection: 'row',
 		height: 40,
+		marginBottom: 10,
 		width: '100%',
-		justifyContent: 'space-around'
+		justifyContent: 'space-between'
 	},
 	buttonContainer: {
-		flexDirection: 'column',
-		justifyContent: 'center',
-		height: 80,
-		width: '100%'
+		// flex: 1,
+		width: '100%',
+		// height: 110
 	},
 	dialogButton: {
+		width: '50%',
 		flex: 1,
 		padding: 10,
+		height: 40,
 		borderRadius: 5,
-		marginHorizontal: 10,
 	},
 	redButton: {
 		backgroundColor: colors.error.hex,
