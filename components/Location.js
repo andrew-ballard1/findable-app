@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, Button } from 'react-native'
+import { View, StyleSheet } from 'react-native'
 import * as Location from 'expo-location'
 import * as TaskManager from 'expo-task-manager'
 import * as Notifications from 'expo-notifications'
+
+import MapView from 'react-native-maps'
 
 const LOCATION_TASK_NAME = 'background-location-task'
 
@@ -41,8 +43,9 @@ const LocationComponent = () => {
 	// Rest of the component code...
 
 	return (
-		<View>
-			<Text>Current Location: </Text>
+		<View style={styles.container}>
+			<MapView style={styles.map} />
+			{/* <Text>Current Location: </Text>
 			{location ? (
 				<Text>
 					Latitude: {location.latitude}, Longitude: {location.longitude}
@@ -50,9 +53,19 @@ const LocationComponent = () => {
 			) : (
 				<Text>Loading location...</Text>
 			)}
-			<Button title="Update Location" onPress={getLocation} />
+			<Button title="Update Location" onPress={getLocation} /> */}
 		</View>
 	)
 }
+
+const styles = StyleSheet.create({
+	container: {
+		lfex: 1,
+	},
+	map: {
+		width: '100%',
+		height: '100%',
+	}
+})
 
 export default LocationComponent
