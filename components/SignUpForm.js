@@ -32,21 +32,12 @@ const SignUpForm = ({ onSkip }) => {
 			toValue: hasAccount ? 0 : 1,
 			useNativeDriver: true,
 		}).start()
-		// if(errors.length > 0){
-			// if(hasAccount){
-				setShowErrors(false)
-			// } else {
-				// setShowErrors(true)
-			// }
-		// } else {
-		// 	setShowErrors(true)
-		// }
+		setShowErrors(false)
 	}, [hasAccount])
 
 	const toggleHasAccount = async () => {
 		console.log(state.forms.signUp.hasAccount)
 		setHasAccount(!hasAccount)
-		// await dispatch({...state, forms: {...state.forms, signUp: {hasAccount: !state.forms.signUp.hasAccount}}})
 	}
 
 	const handleSignUp = () => {

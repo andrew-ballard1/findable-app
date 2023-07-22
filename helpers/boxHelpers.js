@@ -15,7 +15,7 @@ const getBoxes = async (uid, callback) => {
 			boxedItems.push(item)
 		})
 
-		const unsubBoxes = onSnapshot(boxQuery, async (snapshot) => {
+		const unsubBoxes = onSnapshot(boxQuery, (snapshot) => {
 			const boxes = []
 
 			snapshot.forEach((doc) => {

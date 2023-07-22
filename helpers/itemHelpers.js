@@ -17,7 +17,7 @@ items:{
 
 */
 
-const getItems = ({uid, id = null}, callback) => {
+const getItems = async ({uid, id = null}, callback) => {
 	const boxId = id
 	try {
 		let itemQuery

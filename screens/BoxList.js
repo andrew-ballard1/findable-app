@@ -48,11 +48,6 @@ const BoxList = ({ route }) => {
 		updateState()
 	}, [showDeleteDialog])
 
-
-	// useEffect(() => {
-	// 	dispatch({...state, boxes})
-	// }, [boxes])
-
 	const handleAddBox = async () => {
 		// Logic to add a new box
 		await dispatch({ ...state, modal: { ...state.modal, addBox: true } })

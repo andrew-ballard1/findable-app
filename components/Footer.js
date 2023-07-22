@@ -1,7 +1,7 @@
 import React from 'react'
 import { View, StyleSheet, TouchableOpacity, Text } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
-import { SearchIcon, CatalogIcon, ItemListIcon, AccountIcon, AccountAnonymousIcon } from '../svgs/Icons'
+import { SearchIcon, CatalogIcon, ItemListIcon, AccountIcon, AccountAnonymousIcon, OpenBoxIcon } from '../svgs/Icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useGlobalState } from '../Context'
 
@@ -26,7 +26,8 @@ const Footer = () => {
 				onPress={() => navigation.navigate('Boxes', { isAdding: false, isDeleting: false })}
 			>
 				<View>
-					<CatalogIcon />
+					<OpenBoxIcon />
+					{/* <CatalogIcon /> */}
 				</View>
 			</TouchableOpacity>
 			<TouchableOpacity

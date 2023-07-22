@@ -20,9 +20,8 @@ const AddItemDialog = ({ box = '' }) => {
 	useEffect(() => {
 		const getBoxList = async () => {
 			const boxList = await getBoxesOnce(state.user.uid)
-			await dispatch({...state, boxes: boxList})
-			setBoxes(boxList.map((item) => {
-				return { label: item.label, value: item.id }
+			await setBoxes(boxList.map((item) => {
+				return { label: item.label, value: item.id, description: item.description }
 			}))
 		}
 
@@ -30,6 +29,11 @@ const AddItemDialog = ({ box = '' }) => {
 			getBoxList()
 		}
 	}, [])
+
+	// useEffect(() => {
+		// const setState
+		// await dispatch({...state, boxes: boxList})
+	// }, [boxes])
 
 	const cancel = async () => {
 		await dispatch({...state, modal: {...state.modal, addItem: false}})

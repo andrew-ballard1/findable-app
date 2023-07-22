@@ -15,20 +15,15 @@ const ItemList = ({ route }) => {
 	const [deleteLoading, setDeleteLoading] = useState(false)
 
 	useEffect(() => {
-		const unsubItems = getItems({ uid: state.user.uid }, (items) => {
-			setItems(items)
+		const unsubItems = getItems({ uid: state.user.uid }, async (items) => {
+			await setItems(items)
+			
+			if(isAdding){
+				await dispatch({...state, modal: {...state.modal, addItem: true}})
+			}
 		})
-		if(isAdding){
-			dispatch({...state, modal: {...state.modal, addItem: true}})
-		}
 
-		console.log("loaded ItemList")
-
-		return () => {
-			console.log("Unsubscribing from items")
-			unsubItems()
-		}
-
+		return () => unsubItems
 	}, [])
 
 	const handleAddItem = async () => {

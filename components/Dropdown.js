@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { View, StyleSheet } from 'react-native'
 import { Picker } from '@react-native-picker/picker'
 
-const Dropdown = ({options = [{value: '', label: ''}], setter, selected}) => {
+const Dropdown = ({options = [{value: '', label: '', description: ''}], setter, selected}) => {
 	const [selectedValue, setSelectedValue] = useState(selected ? selected : '')
 
 	return (
@@ -18,7 +18,8 @@ const Dropdown = ({options = [{value: '', label: ''}], setter, selected}) => {
 			>
 				<Picker.Item style={{height: 30}} key={'no_box'} label={'No Box'} value={''} />
 				{options.map((option) => {
-					return <Picker.Item style={{height: 30}} key={option.value} label={option.label} value={option.value} />
+					console.log(option)
+					return <Picker.Item style={{height: 30}} key={option.value} label={`${option.label} - ${option.description}`} value={option.value} />
 				})}
 			</Picker>
 		// </View>

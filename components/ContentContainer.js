@@ -12,9 +12,9 @@ import Footer from './Footer'
 const ContentContainer = ({ children }) => {
 	return (
 		<SafeAreaView style={styles.safeContainer}>
-			<ScrollView contentContainerStyle={styles.contentContainer}>
+			{/* <ScrollView contentContainerStyle={styles.contentContainer}> */}
 				{children}
-			</ScrollView>
+			{/* </ScrollView> */}
 			<Footer />
 		</SafeAreaView>
 	)

@@ -20,7 +20,10 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.tryfindable.www",
-      "buildNumber": "10"
+      "buildNumber": "11",
+	  "infoPlist": {
+		"UIBackgroundModes": ["location", "fetch"]
+	  }
     },
     "android": {
       "adaptiveIcon": {

@@ -64,12 +64,6 @@ const Account = () => {
 		return (
 			<View style={{ paddingHorizontal: 20, paddingTop: 0, paddingBottom: 60, display: 'flex', justifyContent: 'space-between', flexDirection: 'column', flex: 1 }}>
 				<SignOutDialog />
-				{/* <TouchableOpacity onPress={() => {
-					dispatch({ ...state, user: { ...state.user, isAnonymous: !state.user.isAnonymous } })
-				}}>
-					<Text>SWITCH USER</Text>
-				</TouchableOpacity> */}
-
 				<View style={{ flex: 1 }}>
 					<Text style={styles.textArea}>I don't know who you are</Text>
 					<Text style={styles.textArea}>I don't know what you want</Text>
@@ -80,14 +74,6 @@ const Account = () => {
 						You can still use the app, delete your account, tell us more about you, or contact support - wait times should be tiny, but official sign ups will get priority (sorry).
 					</Text>
 				</View>
-
-
-				{/* <Text style={[styles.textArea, {marginBottom: 20}]}>You clicked "Skip for now" when signing up</Text> */}
-
-
-				{/* <TouchableOpacity style={[styles.cancelButton, {marginVertical: 20}]} onPress={handleSignOut}>
-					<Text style={styles.cancelButtonText}>Sign Out{state.user.isAnonymous && ' and Delete'}</Text>
-				</TouchableOpacity> */}
 
 				<View style={[styles.buttonContainer]}>
 					<TouchableOpacity style={[styles.textOnly, { textAlign: 'center' }]} onPress={() => { console.log("Copy uid") }}>
@@ -182,7 +168,7 @@ const styles = StyleSheet.create({
 		flex: 1
 	},
 	itemContainer: {
-		borderBottomWidth: '1px',
+		borderBottomWidth: 1,
 		borderBottomColor: '#dddddd',
 		padding: 10,
 		marginBottom: 8,
