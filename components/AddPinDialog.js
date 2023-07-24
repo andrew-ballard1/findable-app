@@ -1,81 +1,86 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, Keyboard } from 'react-native'
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, Keyboard, Dimensions, KeyboardAvoidingView } from 'react-native'
 
 import colors from '../colors'
 import { addBox } from '../helpers/boxHelpers'
 import { useGlobalState } from '../Context'
-import { getItemsOnce } from '../helpers/itemHelpers'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Modal from 'react-native-modal'
+import { saveLocation } from '../helpers/spotHelpers'
 
-const AddBoxDialog = () => {
+const AddPinDialog = () => {
 	const [state, dispatch] = useGlobalState()
 
 	const [label, setLabel] = useState('')
 	const [description, setDescription] = useState('')
-	const [buttonText, setButtonText] = useState('Add Box')
-	// const [items, setItems] = useState(false)
-
-	// const { bottom } = useSafeAreaInsets()
-
-	// useEffect(() => {
-	// 	const getItemList = async () => {
-	// 		const itemList = await getItemsOnce(state.user.uid)
-	// 		setItems(itemList)
-	// 	}
-
-	// 	if (state.user.uid) {
-	// 		getItemList()
-	// 	}
-	// }, [])
+	const [buttonText, setButtonText] = useState('Add Location')
 
 
-	const handleAddBox = async () => {
+	const handleAddLocation = async () => {
 		setButtonText("Adding...")
-		const boxId = await addBox({ label, description }, state.user.uid)
-		
-		console.log(`Added ${boxId}`)
-		
+		const locationId = await saveLocation({ label, description, latitude: state.modal.addPin.latitude, longitude: state.modal.addPin.longitude, accuracy: 10 }, state.user.uid)
+
+		console.log(`Added ${locationId}`)
+
 		setLabel('')
 		setDescription('')
 		setButtonText("Done!")
-		await dispatch({...state, modal:{...state.modal, addBox: false}})
-		
+		await dispatch({ ...state, modal: { ...state.modal, addPin: false }, markers: [...state.markers, { label, description, latitude: state.modal.addPin.latitude, longitude: state.modal.addPin.longitude, accuracy: 10 }] })
+
 		setTimeout(async () => {
-			setButtonText("Add Box")
+			setButtonText("Add Location")
 		}, 500)
-		
+
 		// I should probably add a try catch here
 	}
 
 	const cancel = async () => {
-		await dispatch({...state, modal:{...state.modal, addBox: false}})
+		await dispatch({ ...state, modal: { ...state.modal, addPin: false } })
 
 		setTimeout(() => {
 			setDescription('')
 			setLabel('')
 		}, 300)
 	}
+	const [debounce, setDebounce] = useState()
+
+	useEffect(() => {
+		const updateValues = async () => {
+			await dispatch({ ...state, modal: { ...state.modal, addPin: { ...state.modal.addPin, label, description } } })
+		}
+
+		if (label.length > 0 || description.length > 0) {
+			clearTimeout(debounce)
+			setDebounce(null)
+			setDebounce(setTimeout(async () => {
+				updateValues()
+			}, 1000))
+		} else {
+			clearTimeout(debounce)
+			setDebounce(null)
+		}
+	}, [label, description])
 
 	return (
-		// <KeyboardAvoidingView
-		// 	// style={{ flex: 1 }}
-		// 	behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
-		// 	keyboardVerticalOffset={140}
-		// >
-			<Modal
-				animationIn='slideInUp'
-				animationOut='slideOutDown'
-				isVisible={state.modal.addBox}
-				transparent={true}
-				avoidKeyboard={true}
-				style={{justifyContent: 'center'}}
+		<Modal
+			animationIn='slideInUp'
+			animationOut='slideOutDown'
+			isVisible={state.modal.addPin ? true : false}
+			transparent={true}
+			avoidKeyboard={false}
+			hasBackdrop={false}
+			coverScreen={false}
+			style={{justifyContent: 'flex-end'}}
+		>
+			<KeyboardAvoidingView
+				// style={{ flex: 1 }}
+				behavior={Platform.OS == 'ios' ? 'padding' : 'height'}
+				keyboardVerticalOffset={90}
 			>
 				<View style={[styles.container]}>
 					<View style={styles.dialogContainer}>
 						<View style={styles.dialogContent}>
 							<Text style={styles.dialogText}>
-								{label.length > 0 ? `Adding "${label}"` : "Add a new box of Stuff!"}
+								{label.length > 0 ? `Adding "${label}"` : "Add a new storage spot!"}
 							</Text>
 							<View
 								style={{ display: 'flex', flexDirection: 'column', flex: 1, width: '100%', padding: 10, marginBottom: 20 }}
@@ -105,7 +110,7 @@ const AddBoxDialog = () => {
 									style={[styles.dialogButton, styles.blueButton]}
 									onPress={() => {
 										Keyboard.dismiss()
-										handleAddBox()
+										handleAddLocation()
 									}}
 								>
 									<Text numberOfLines={1} style={styles.buttonText}>{buttonText}</Text>
@@ -123,8 +128,9 @@ const AddBoxDialog = () => {
 						</View>
 					</View>
 				</View>
-			</Modal>
-		// </KeyboardAvoidingView >
+			</KeyboardAvoidingView>
+		</Modal>
+
 	)
 }
 
@@ -132,10 +138,11 @@ const styles = StyleSheet.create({
 	container: {
 		display: 'flex',
 		width: '100%',
+		height: '100%',
 		flex: 1,
 		justifyContent: 'flex-end',
 		alignItems: 'center',
-		paddingBottom: 70
+		paddingBottom: 40
 	},
 	deleteButton: {
 		backgroundColor: 'red',
@@ -166,7 +173,8 @@ const styles = StyleSheet.create({
 		backgroundColor: 'white',
 		borderRadius: 10,
 		shadowColor: '#000',
-		width: '100%',
+		// width: '100%',
+		width: Dimensions.get('window').width,
 		shadowOffset: { width: 0, height: -2 },
 		shadowOpacity: 0.1,
 		shadowRadius: 4,
@@ -220,4 +228,4 @@ const styles = StyleSheet.create({
 	},
 })
 
-export default AddBoxDialog
+export default AddPinDialog

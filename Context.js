@@ -18,6 +18,7 @@ const globalState = {
 	posts: [],
 	boxes: [],
 	items: [],
+	locations: [],
 	user: 'isLoading',
 	auth,
 	api_url: 'https://localhost:3000',
@@ -25,8 +26,11 @@ const globalState = {
 		addBox: false,
 		deleteBox: false,
 		addItem: false,
-		deleteItem: false
+		deleteItem: false,
+		addPin: false,
+		deletePin: false
 	},
+	markers: [],
 	forms: {
 		signUp: {
 			hasAccount: false
